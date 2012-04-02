@@ -12,7 +12,7 @@ TTYLINUX_VERSION=
 # Platform, cross-tool, and CFLAGS.  Be carefull with changes.
 #
 TTYLINUX_PLATFORM=pc_i686
-TTYLINUX_XBT_DIR="../cross-tools-2.13-2.6.38.1"
+TTYLINUX_XBT_DIR="../cross-tools-2.14-2.6.38.1"
 TTYLINUX_XBT="i686-generic-linux-gnu"
 TTYLINUX_CFLAGS="-march=i686 -mtune=generic -Os"
 
