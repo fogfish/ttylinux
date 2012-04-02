@@ -78,15 +78,21 @@ right fix may be to balance some moving part in the box.
 3. Questions, Requests and Suggestions
 ======================================
 
-If you have some general question about ttylinux then email the ttylinux mail
-list.
+If you have some question(s) about using ttylinux, or some general ttylinux
+question, then:
+
+     FIRST - read the ttylinux User Guide at http://ttylinux.net/docs.html
+
+     then, if you still have questions or need mor einformation, email the
+     ttylinux mail list:  ttylinux@googlegroups.com
+                          http://groups.google.com/group/ttylinux/
 
 If you have an idea for a kernel configuration improvement or existing package
 configuration improvement, then you should send email describing the change to
 the ttylinux mail list.
 
-First, read section 2 of this document, then email your thoughts to the
-ttylinux mail list.
+Otherwise, first read section 2 of this document, then email your thoughts to
+the ttylinux mail list:
      ttylinux@googlegroups.com
      http://groups.google.com/group/ttylinux/
 

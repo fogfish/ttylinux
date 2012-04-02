@@ -51,7 +51,7 @@ pkg_configure() {
 
 local WITHOUT_CXX=""
 
-PKG_STATUS="Unspecified error -- check the ${PKG_NAME} build log"
+PKG_STATUS="./configure error"
 
 cd "${PKG_NAME}-${PKG_VERSION}"
 
@@ -91,7 +91,7 @@ CFLAGS="${TTYLINUX_CFLAGS}" \
 	${WITHOUT_CXX} \
 	--without-debug \
 	--without-gpm \
-	--without-normal
+	--without-normal || return 1
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_clr"
 
 cd ..
@@ -108,11 +108,13 @@ return 0
 
 pkg_make() {
 
-PKG_STATUS="Unspecified error -- check the ${PKG_NAME} build log"
+PKG_STATUS="make error"
 
 cd "${PKG_NAME}-${PKG_VERSION}"
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_set"
-PATH="${XBT_BIN_PATH}:${PATH}" make --jobs=${NJOBS} CROSS_COMPILE=${XBT_TARGET}-
+PATH="${XBT_BIN_PATH}:${PATH}" make \
+	--jobs=${NJOBS} \
+	CROSS_COMPILE=${XBT_TARGET}- || return 1
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_clr"
 cd ..
 
@@ -128,25 +130,28 @@ return 0
 
 pkg_install() {
 
-PKG_STATUS="Unspecified error -- check the ${PKG_NAME} build log"
+PKG_STATUS="install error"
 
 cd "${PKG_NAME}-${PKG_VERSION}"
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_set"
 
-PATH="${XBT_BIN_PATH}:${PATH}" make install
+PATH="${XBT_BIN_PATH}:${PATH}" make install || return 1
 
-ln="ln --force --symbolic"
-${ln} ../../lib/libncurses.so.5   ${TTYLINUX_SYSROOT_DIR}/usr/lib/libcurses.so
-${ln} ../../lib/libform.so.5      ${TTYLINUX_SYSROOT_DIR}/usr/lib/libform.so
-${ln} ../../lib/libmenu.so.5      ${TTYLINUX_SYSROOT_DIR}/usr/lib/libmenu.so
-${ln} ../../lib/libncurses.so.5   ${TTYLINUX_SYSROOT_DIR}/usr/lib/libncurses.so
-${ln} ../../lib/libpanel.so.5     ${TTYLINUX_SYSROOT_DIR}/usr/lib/libpanel.so
-${ln} ../../lib/libncurses.so.5.7 ${TTYLINUX_SYSROOT_DIR}/usr/lib/libcurses.so.5
-${ln} ../../lib/libform.so.5.7    ${TTYLINUX_SYSROOT_DIR}/usr/lib/libform.so.5
-${ln} ../../lib/libmenu.so.5.7    ${TTYLINUX_SYSROOT_DIR}/usr/lib/libmenu.so.5
-${ln} ../../lib/libncurses.so.5.7 ${TTYLINUX_SYSROOT_DIR}/usr/lib/libncurses.so.5
-${ln} ../../lib/libpanel.so.5.7   ${TTYLINUX_SYSROOT_DIR}/usr/lib/libpanel.so.5
-unset ln
+_ln="ln --force --symbolic"
+_usrlib="${TTYLINUX_SYSROOT_DIR}/usr/lib"
+${_ln} ../../lib/libncurses.so.5   ${_usrlib}/libcurses.so
+${_ln} ../../lib/libform.so.5      ${_usrlib}/libform.so
+${_ln} ../../lib/libmenu.so.5      ${_usrlib}/libmenu.so
+${_ln} ../../lib/libncurses.so.5   ${_usrlib}/libncurses.so
+${_ln} ../../lib/libpanel.so.5     ${_usrlib}/libpanel.so
+${_ln} ../../lib/libncurses.so.5.7 ${_usrlib}/libcurses.so.5
+${_ln} ../../lib/libform.so.5.7    ${_usrlib}/libform.so.5
+${_ln} ../../lib/libmenu.so.5.7    ${_usrlib}/libmenu.so.5
+${_ln} ../../lib/libncurses.so.5.7 ${_usrlib}/libncurses.so.5
+${_ln} ../../lib/libpanel.so.5.7   ${_usrlib}/libpanel.so.5
+${_ln} libncurses.so.5 ${_usrlib}/libtinfo.so.5
+${_ln} libtinfo.so.5   ${_usrlib}/libtinfo.so
+unset _ln
 
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_clr"
 cd ..

@@ -34,6 +34,7 @@
 #
 # CHANGE LOG
 #
+#	27mar12	drj	Added support for build continuation.
 #	17mar12	drj	Added ttylinux beagle_bone cross-tool chain.
 #	13feb12	drj	Project reorganization.
 #	20feb11	drj	Finished miscellaneous changes for the first release.
@@ -44,7 +45,7 @@
 #	12apr10	drj	Removed the TIMECMD.
 #	03mar10	drj	Removed the arm and i486 targets.
 #	20aug09	drj	Added the x86_64 cross-tool chain.
-#	22jul09	drj	Added the arm-eabi and arnv5l cross-tool chain.
+#	22jul09	drj	Added the arm-eabi and armv5l cross-tool chain.
 #	23dec08	drj	Added the i686 cross-tool chain.
 #	22nov08	drj	Changed the names of some cleaning targets.
 #	13nov08	drj	Replace time with macro TIMECMD.
@@ -70,25 +71,36 @@ SHELL=/bin/bash
 # *****************************************************************************
 
 .PHONY:	help setup clean dload
-.PHONY:	armv7-2.14-gnueabi mipsel-uclibc powerpc-2.13-gnu
-.PHONY:	i486-2.9-gnu i686-2.13-gnu x86_64-2.13-gnu
+.PHONY:	armv7-2.14-gnueabi mipsel-uclibc powerpc-2.14-gnu
+.PHONY:	i486-2.9-gnu i686-2.14-gnu x86_64-2.14-gnu
 
 help:
 	@echo ""
-	@echo "Make a ttylinux cross-development tool chain."
+	@echo "Make a ttylinux Cross-development Tool Chain"
 	@echo ""
 	@echo "make setup ... Do this before using any of the other make"
 	@echo "               commands.  This needs to be done first, and"
 	@echo "               only one time is needed (more will not hurt)."
 	@echo ""
-	@echo "Make Commands                    ttylinux Cross-tool Chain"
+	@echo "make <target> CONTINUE=yes ... Continue building from the"
+	@echo "                               last successful build step."
+	@echo "                               See the <target> list in the"
+	@echo "                               Make Command Examples below."
+	@echo ""
+	@echo "Make Command Examples            ttylinux Cross-tool Chain"
 	@echo "-----------------------          -------------------------"
 	@echo "make armv7-2.14-gnueabi ........ beagle_bone (linux-3.1.0)"
 	@echo "make mipsel-uclibc ............. wrtu54g_tm  (linux-2.6.36.4)"
-	@echo "make powerpc-2.13-gnu .......... mac_g4      (linux-2.6.38.1)"
+	@echo "make powerpc-2.14-gnu .......... mac_g4      (linux-2.6.38.1)"
 	@echo "make i486-2.9-gnu .............. pc_i486     (linux-2.6.34.6)"
-	@echo "make i686-2.13-gnu ............. pc_i686     (linux-2.6.38.1)"
-	@echo "make x86_64-2.13-gnu ........... pc_x86_64   (linux-2.6.38.1)"
+	@echo "make i686-2.14-gnu ............. pc_i686     (linux-2.6.38.1)"
+	@echo "make x86_64-2.14-gnu ........... pc_x86_64   (linux-2.6.38.1)"
+	@echo ""
+	@echo "Variables:"
+	@echo ""
+	@echo "export XBT_STEP=yes .... This will enable stepping through the"
+	@echo "                         build steps.  Respond at the prompt"
+	@echo "                         with \"g\" to stop stepping."
 	@echo ""
 
 setup:
@@ -103,32 +115,32 @@ dload:	xbt-build-config.sh
 armv7-2.14-gnueabi:
 	rm -f xbt-build-config.sh
 	cp config/ttyl-beagle_bone.cfg xbt-build-config.sh
-	./scripts/_build-toolchain.sh
+	./scripts/_build-toolchain.sh $${CONTINUE/yes/continue}
 
 mipsel-uclibc:
 	rm -f xbt-build-config.sh
 	cp config/ttyl-wrtu54g_tm.cfg xbt-build-config.sh
-	./scripts/_build-toolchain.sh
+	./scripts/_build-toolchain.sh $${CONTINUE/yes/continue}
 
-powerpc-2.13-gnu:
+powerpc-2.14-gnu:
 	rm -f xbt-build-config.sh
 	cp config/ttyl-mac_g4.cfg xbt-build-config.sh
-	./scripts/_build-toolchain.sh
+	./scripts/_build-toolchain.sh $${CONTINUE/yes/continue}
 
 i486-2.9-gnu:
 	rm -f xbt-build-config.sh
 	cp config/ttyl-pc_i486.cfg xbt-build-config.sh
-	./scripts/_build-toolchain.sh
+	./scripts/_build-toolchain.sh $${CONTINUE/yes/continue}
 
-i686-2.13-gnu:
+i686-2.14-gnu:
 	rm -f xbt-build-config.sh
 	cp config/ttyl-pc_i686.cfg xbt-build-config.sh
-	./scripts/_build-toolchain.sh
+	./scripts/_build-toolchain.sh $${CONTINUE/yes/continue}
 
-x86_64-2.13-gnu:
+x86_64-2.14-gnu:
 	rm -f xbt-build-config.sh
 	cp config/ttyl-pc_x86_64.cfg xbt-build-config.sh
-	./scripts/_build-toolchain.sh
+	./scripts/_build-toolchain.sh $${CONTINUE/yes/continue}
 
 
 # end of Makefile

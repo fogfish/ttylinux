@@ -107,6 +107,7 @@ xbt_debug_break ""
 # Find, uncompress and untarr ${XBT_BINUTILS}.
 #
 xbt_src_get ${XBT_BINUTILS}
+unset _name
 
 # Make an entry in the manifest.
 #
@@ -151,6 +152,7 @@ echo "# XBT_CONFIG **********"
 	--prefix=${XBT_XHOST_DIR}/usr \
 	${ENABLE_BFD64} \
 	--enable-shared \
+	--disable-build-warnings \
 	--disable-multilib \
 	--with-sysroot=${XBT_XTARG_DIR} || exit 1
 

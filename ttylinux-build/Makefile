@@ -26,6 +26,7 @@
 #
 # CHANGE LOG
 #
+#	24mar12	drj	Cleaning error paths.
 #	18mar12	drj	Call site script even if error in scripts/* script.
 #	19feb12	drj	Rewrite for build process reorganization.
 #	10feb12	drj	Fixed the "SHELL" macro to be bash.
@@ -320,7 +321,6 @@ clean:	scripts/bld-clean.sh
 	fi;								\
 	(scripts/bld-clean.sh all);					\
 	mystat=$$?;							\
-	[ $$mystat -eq 0 ] || echo "ERROR";				\
 	if [ x"$${TTYLINUX_SITE_SCRIPTS:-}" = x"y" ]; then		\
 		if [ -x site/bld-clean-1.sh ]; then			\
 			(site/bld-clean-1.sh all);			\
@@ -351,7 +351,6 @@ kclean:	scripts/bld-clean.sh
 	fi;								\
 	(scripts/bld-clean.sh kernel);					\
 	mystat=$$?;							\
-	[ $$mystat -eq 0 ] || echo "ERROR";				\
 	if [ x"$${TTYLINUX_SITE_SCRIPTS:-}" = x"y" ]; then		\
 		if [ -x site/bld-clean-1.sh ]; then			\
 			(site/bld-clean-1.sh kernel);			\
@@ -380,7 +379,6 @@ pclean:	scripts/bld-clean.sh
 	fi;								\
 	(scripts/bld-clean.sh packages);				\
 	mystat=$$?;							\
-	[ $$mystat -eq 0 ] || echo "ERROR";				\
 	if [ x"$${TTYLINUX_SITE_SCRIPTS:-}" = x"y" ]; then		\
 		if [ -x site/bld-clean-1.sh ]; then			\
 			(site/bld-clean-1.sh packages);			\
@@ -410,10 +408,9 @@ init:	scripts/bld-init.sh
 	fi;								\
 	(scripts/bld-init.sh);						\
 	mystat=$$?;							\
-	[ $$mystat -eq 0 ] || echo "ERROR";				\
 	if [ x"$${TTYLINUX_SITE_SCRIPTS:-}" = x"y" ]; then		\
 		if [ -x site/bld-init-1.sh ]; then			\
-			(site/bld-init-1.sh);				\
+			(site/bld-init-1.sh $${mystat});		\
 		fi							\
 	fi;								\
 	if [ $$mystat -ne 0 ]; then					\
@@ -433,10 +430,9 @@ pkgs:	ttylinux-pkglst.txt var/run/init is_build_coherent scripts/bld-packages.sh
 	fi;								\
 	(scripts/bld-packages.sh);					\
 	mystat=$$?;							\
-	[ $$mystat -eq 0 ] || echo "ERROR";				\
 	if [ x"$${TTYLINUX_SITE_SCRIPTS:-}" = x"y" ]; then		\
 		if [ -x site/bld-packages-1.sh ]; then			\
-			(site/bld-packages-1.sh);			\
+			(site/bld-packages-1.sh $${mystat});		\
 		fi							\
 	fi;								\
 	if [ $$mystat -ne 0 ]; then					\
@@ -456,10 +452,9 @@ pkgs_:	ttylinux-pkglst.txt var/run/init is_build_coherent scripts/bld-packages.s
 	fi;								\
 	(scripts/bld-packages.sh continue);				\
 	mystat=$$?;							\
-	[ $$mystat -eq 0 ] || echo "ERROR";				\
 	if [ x"$${TTYLINUX_SITE_SCRIPTS:-}" = x"y" ]; then		\
 		if [ -x site/bld-packages-1.sh ]; then			\
-			(site/bld-packages-1.sh);			\
+			(site/bld-packages-1.sh $${mystat});		\
 		fi							\
 	fi;								\
 	if [ $$mystat -ne 0 ]; then					\
@@ -479,10 +474,9 @@ kernel:	scripts/bld-kernel.sh
 	fi;								\
 	(scripts/bld-kernel.sh);					\
 	mystat=$$?;							\
-	[ $$mystat -eq 0 ] || echo "ERROR";				\
 	if [ x"$${TTYLINUX_SITE_SCRIPTS:-}" = x"y" ]; then		\
 		if [ -x site/bld-kernel-1.sh ]; then			\
-			(site/bld-kernel-1.sh);				\
+			(site/bld-kernel-1.sh $${mystat});		\
 		fi							\
 	fi;								\
 	if [ $$mystat -ne 0 ]; then					\
@@ -502,10 +496,9 @@ fsys:	var/run/packages is_build_coherent scripts/bld-fsys.sh
 	fi;								\
 	(scripts/bld-fsys.sh);						\
 	mystat=$$?;							\
-	[ $$mystat -eq 0 ] || echo "ERROR";				\
 	if [ x"$${TTYLINUX_SITE_SCRIPTS:-}" = x"y" ]; then		\
 		if [ -x site/bld-fsys-1.sh ]; then			\
-			(site/bld-fsys-1.sh);				\
+			(site/bld-fsys-1.sh $${mystat});		\
 		fi							\
 	fi;								\
 	if [ $$mystat -ne 0 ]; then					\
@@ -525,10 +518,9 @@ distdir:	var/run/fsys var/run/kernel scripts/bld-distdir.sh
 	fi;								\
 	(scripts/bld-distdir.sh);					\
 	mystat=$$?;							\
-	[ $$mystat -eq 0 ] || echo "ERROR";				\
 	if [ x"$${TTYLINUX_SITE_SCRIPTS:-}" = x"y" ]; then		\
 		if [ -x site/bld-distdir-1.sh ]; then			\
-			(site/bld-distdir-1.sh);			\
+			(site/bld-distdir-1.sh $${mystat});		\
 		fi							\
 	fi;								\
 	if [ $$mystat -ne 0 ]; then					\
@@ -548,10 +540,9 @@ distimg:	var/run/distdir scripts/bld-distimg.sh
 	fi;								\
 	(scripts/bld-distimg.sh);					\
 	mystat=$$?;							\
-	[ $$mystat -eq 0 ] || echo "ERROR";				\
 	if [ x"$${TTYLINUX_SITE_SCRIPTS:-}" = x"y" ]; then		\
 		if [ -x site/bld-distimg-1.sh ]; then			\
-			(site/bld-distimg-1.sh);			\
+			(site/bld-distimg-1.sh $${mystat});		\
 		fi							\
 	fi;								\
 	if [ $$mystat -ne 0 ]; then					\

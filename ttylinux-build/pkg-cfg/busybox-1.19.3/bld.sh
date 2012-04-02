@@ -75,8 +75,6 @@ pkg_make() {
 local cfg=""
 local SKIP_STRIP_FLAG=""
 
-PKG_STATUS="Unspecified error -- check the ${PKG_NAME} build log"
-
 if [[ x"${TTYLINUX_STRIP_BINS:-}" == x"" ]]; then
 	SKIP_STRIP_FLAG=y
 fi
@@ -99,14 +97,16 @@ else
 	return 1
 fi
 
+PKG_STATUS="make error"
 CFLAGS="${TTYLINUX_CFLAGS} --sysroot=${TTYLINUX_SYSROOT_DIR}" \
-PATH="${XBT_BIN_PATH}:${PATH}" \
-	make --jobs=${NJOBS} \
+PATH="${XBT_BIN_PATH}:${PATH}" make \
+	--jobs=${NJOBS} \
 	ARCH="${TTYLINUX_CPU}" \
 	CROSS_COMPILE="${XBT_TARGET}-" \
 	CONFIG_PREFIX=${TTYLINUX_SYSROOT_DIR} \
-	SKIP_STRIP=${SKIP_STRIP_FLAG}
+	SKIP_STRIP=${SKIP_STRIP_FLAG} || return 1
 
+PKG_STATUS="make install error"
 # CFLAGS, ARCH and CROSS_COMPILE seem to be needed to make install.
 # Change the location of awk.
 #
@@ -115,7 +115,7 @@ PATH="${XBT_BIN_PATH}:${PATH}" make \
 	ARCH="${TTYLINUX_CPU}" \
 	CROSS_COMPILE="${XBT_TARGET}-" \
 	CONFIG_PREFIX=${TTYLINUX_SYSROOT_DIR} \
-	install
+	install || return 1
 mv "${TTYLINUX_SYSROOT_DIR}/usr/bin/awk" "${TTYLINUX_SYSROOT_DIR}/bin/awk"
 
 make distclean # Roll-play like nothing happened.
@@ -133,13 +133,14 @@ else
 	return 1
 fi
 
+PKG_STATUS="make error"
 CFLAGS="${TTYLINUX_CFLAGS} --sysroot=${TTYLINUX_SYSROOT_DIR}" \
-PATH="${XBT_BIN_PATH}:${PATH}" \
-	make --jobs=${NJOBS} \
+PATH="${XBT_BIN_PATH}:${PATH}" make \
+	--jobs=${NJOBS} \
 	ARCH="${TTYLINUX_CPU}" \
 	CROSS_COMPILE="${XBT_TARGET}-" \
 	CONFIG_PREFIX=${TTYLINUX_SYSROOT_DIR} \
-	SKIP_STRIP=${SKIP_STRIP_FLAG}
+	SKIP_STRIP=${SKIP_STRIP_FLAG} || return 1
 
 # Install busybox suid files.
 #

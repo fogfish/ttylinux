@@ -61,7 +61,7 @@ pkg_make() {
 
 local BS_BITS="32"
 
-PKG_STATUS="Unspecified error -- check the ${PKG_NAME} build log"
+PKG_STATUS="make error"
 
 if [[ "${TTYLINUX_CPU}" == "x86_64" ]]; then BS_BITS=64; fi
 
@@ -81,12 +81,9 @@ PATH="${XBT_BIN_PATH}:${PATH}" make \
 	STRIP="${XBT_STRIP}" \
 	calc-static-only \
 		BLD_TYPE=calc-static-only \
-		LONG_BITS=${BS_BITS}
+		LONG_BITS=${BS_BITS} || return 1
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_clr"
 cd ..
-
-#		INCDIR="${TTYLINUX_XTOOL_DIR}/target/usr/include" \
-
 
 PKG_STATUS=""
 return 0

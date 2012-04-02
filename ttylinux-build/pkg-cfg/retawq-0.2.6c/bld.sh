@@ -61,7 +61,7 @@ pkg_make() {
 
 local THREADING=1
 
-PKG_STATUS="Unspecified error -- check the ${PKG_NAME} build log"
+PKG_STATUS="make error"
 
 if [[ "${TTYLINUX_PLATFORM}" == "pc_i486" || \
       "${TTYLINUX_PLATFORM}" == "wrtu54g_tm" ]]; then
@@ -78,7 +78,7 @@ PATH="${XBT_BIN_PATH}:${PATH}" make \
 	OPTION_TEXTMODEMOUSE=0 \
 	OPTION_TG=bicurses \
 	OPTION_THREADING=${THREADING} \
-	devel
+	devel || return 1
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_clr"
 cd ..
 

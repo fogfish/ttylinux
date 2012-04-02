@@ -57,14 +57,6 @@ sed -i 's/install_to_$(INSTALL_DEST) //' libiberty/Makefile.in
 # Pure 64-bit fixups.
 #
 if [[ "${TTYLINUX_CPU}" = "x86_64" ]]; then
-	# Change GCC to use /lib   for 64-bit stuff, not /lib64
-	# Change GCC to use /lib32 for 32-bit stuff, not /lib
-	sed -e 's|/lib/ld-linux.so.2|/lib32/ld-linux.so.2|' \
-		-i gcc/config/i386/linux64.h
-	sed -e 's|/lib64/ld-linux-x86-64.so.2|/lib/ld-linux-x86-64.so.2|' \
-		-i gcc/config/i386/linux64.h
-	sed -e 's|../lib64|../lib|'   -i gcc/config/i386/t-linux64
-	sed -e 's|../lib)|../lib32)|' -i gcc/config/i386/t-linux64
 	# On x86_64, unsetting the multilib spec for GCC ensures that it won't
 	# attempt to link against libraries on the host.
 	for file in $(find gcc/config -name t-linux64) ; do
@@ -72,16 +64,6 @@ if [[ "${TTYLINUX_CPU}" = "x86_64" ]]; then
 	done
 	unset file
 fi
-
-# Trust the header files and do not run fixinc.sh; the Linux kernel and GLIBC
-# header files should be good.
-# I don't trust what I see in gcc/Makefile.in; it seems to be able to refer to
-# the host header files for cross-built GCC. wtf?!
-#
-sed 's|\./fixinc\.sh|-c true|' -i gcc/Makefile.in
-_headerDir="${TTYLINUX_SYSROOT_DIR}/usr/include"
-sed -e "s|^\(CROSS_SYSTEM_HEADER_DIR =\).*|\1 ${_headerDir}|" -i gcc/Makefile.in
-unset _headerDir
 
 cd ..
 
@@ -104,21 +86,7 @@ local ENABLE_LANGUAGES="--enable-languages=c"
 local ENABLE__CXA_ATEXIT=""
 local ENABLE_THREADS="--enable-threads=no"
 
-PKG_STATUS="Unspecified error -- check the ${PKG_NAME} build log"
-
-if [[ -n "${TTYLINUX_PACKAGE_GCC_GMP_VER:-}" ]]; then
-	_name="gmp-${TTYLINUX_PACKAGE_GCC_GMP_VER}"
-	package_get ${_name}
-	mv ${_name} ${PKG_NAME}-${PKG_VERSION}/gmp
-	unset _name
-fi
-
-if [[ -n "${TTYLINUX_PACKAGE_GCC_MPFR_VER:-}" ]]; then
-	_name="mpfr-${TTYLINUX_PACKAGE_GCC_MPFR_VER}"
-	package_get ${_name}
-	mv ${_name} ${PKG_NAME}-${PKG_VERSION}/mpfr
-	unset _name
-fi
+PKG_STATUS="./configure error"
 
 cd "build-gcc"
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_set"
@@ -135,10 +103,10 @@ ENABLE_LANGUAGES="--enable-languages=c"
 ENABLE__CXA_ATEXIT=""
 
 AR=${XBT_AR} \
-AS=${XBT_AS} \
-CC=${XBT_CC} \
-CXX=${XBT_CXX} \
-LD=${XBT_LD} \
+AS="${XBT_AS} --sysroot=${TTYLINUX_SYSROOT_DIR}" \
+CC="${XBT_CC} --sysroot=${TTYLINUX_SYSROOT_DIR}" \
+CXX="${XBT_CXX} --sysroot=${TTYLINUX_SYSROOT_DIR}" \
+LD="${XBT_LD} --sysroot=${TTYLINUX_SYSROOT_DIR}" \
 NM=${XBT_NM} \
 OBJCOPY=${XBT_OBJCOPY} \
 RANLIB=${XBT_RANLIB} \
@@ -150,6 +118,7 @@ CFLAGS="${TTYLINUX_CFLAGS}" \
 	--host=${XBT_TARGET} \
 	--target=${XBT_TARGET} \
 	--prefix=/usr \
+	--infodir=/usr/share/info \
 	--mandir=/usr/share/man \
 	${ENABLE_LANGUAGES} \
 	--enable-c99 \
@@ -166,7 +135,9 @@ CFLAGS="${TTYLINUX_CFLAGS}" \
 	--disable-libssp \
 	--disable-libstdcxx-pch \
 	--disable-multilib \
-	--disable-nls
+	--disable-nls \
+	--with-gmp=${TTYLINUX_SYSROOT_DIR}/usr \
+	--with-mpfr=${TTYLINUX_SYSROOT_DIR}/usr || return 1
 
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_clr"
 cd ..
@@ -183,11 +154,14 @@ return 0
 
 pkg_make() {
 
-PKG_STATUS="Unspecified error -- check the ${PKG_NAME} build log"
+PKG_STATUS="make error"
 
 cd "build-gcc"
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_set"
-PATH="${XBT_BIN_PATH}:${PATH}" make --jobs=${NJOBS} CROSS_COMPILE=${XBT_TARGET}-
+NJOBS=1
+PATH="${XBT_BIN_PATH}:${PATH}" make \
+	--jobs=${NJOBS} \
+	CROSS_COMPILE=${XBT_TARGET}- || return 1
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_clr"
 cd ..
 
@@ -203,11 +177,13 @@ return 0
 
 pkg_install() {
 
-PKG_STATUS="Unspecified error -- check the ${PKG_NAME} build log"
+PKG_STATUS="make install error"
 
 cd "build-gcc"
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_set"
-PATH="${XBT_BIN_PATH}:${PATH}" make DESTDIR=${TTYLINUX_SYSROOT_DIR} install
+PATH="${XBT_BIN_PATH}:${PATH}" make \
+	DESTDIR=${TTYLINUX_SYSROOT_DIR} \
+	install || return 1
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_clr"
 cd ..
 

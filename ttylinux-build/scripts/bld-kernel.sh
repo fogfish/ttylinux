@@ -145,7 +145,7 @@ kernel_clean
 # Uncompress, untarr then remove linux-${kver}.tar.bz2 and put the kernel
 # configuration file in place.
 #
-# trap kernel_clean EXIT
+trap kernel_clean EXIT
 #
 ttylinux_build_comment ""
 ttylinux_build_command "cp ${srcd}/linux-${kver}.tar.bz2 linux-${kver}.tar.bz2"

@@ -72,14 +72,15 @@ return 0
 
 pkg_make() {
 
-PKG_STATUS="Unspecified error -- check the ${PKG_NAME} build log"
+PKG_STATUS="make error"
 
 cd "${PKG_NAME}-${PKG_VERSION}"
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_set"
 
 [[ "$(uname -m)" != "x86_64" ]] && HOST_CC="gcc"
 [[ "$(uname -m)" == "x86_64" ]] && HOST_CC="gcc -m64"
-PATH="${XBT_BIN_PATH}:${PATH}" make --jobs=${NJOBS} \
+PATH="${XBT_BIN_PATH}:${PATH}" make \
+	--jobs=${NJOBS} \
 	BUILD_CC="${HOST_CC}" \
 	CC="${XBT_CC} --sysroot=${TTYLINUX_SYSROOT_DIR}" \
 	CONFIG="-DBDATA         -DDSECS=3    -DDEVMAPPER=\"\" -DEVMS  \
@@ -87,7 +88,7 @@ PATH="${XBT_BIN_PATH}:${PATH}" make --jobs=${NJOBS} \
 		-DREWRITE_TABLE -DSOLO_CHAIN -DVERSION" \
 	CROSS_COMPILE=${XBT_TARGET}- \
 	OPT="${TTYLINUX_CFLAGS}" \
-	all
+	all || return 1
 
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_clr"
 cd ..

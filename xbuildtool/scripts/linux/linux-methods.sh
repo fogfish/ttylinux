@@ -124,15 +124,17 @@ xbt_src_get ${XBT_LINUX} "${XBT_XSRC_DIR}"
 
 # Make manifest entry.
 #
-echo -n "${XBT_LINUX} " >>"${XBT_TOOLCHAIN_MANIFEST}"
-echo -n "${XBT_LINUX} " >>"${XBT_TARGET_MANIFEST}"
-for ((i=(40-${#XBT_LINUX}) ; i > 0 ; i--)) do
+echo -n "${_name} " >>"${XBT_TOOLCHAIN_MANIFEST}"
+echo -n "${_name} " >>"${XBT_TARGET_MANIFEST}"
+for ((i=(40-${#_name}) ; i > 0 ; i--)) do
         echo -n "." >>"${XBT_TOOLCHAIN_MANIFEST}"
         echo -n "." >>"${XBT_TARGET_MANIFEST}"
 done
 echo " ${XBT_LINUX_URL}" >>"${XBT_TOOLCHAIN_MANIFEST}"
 echo " ${XBT_LINUX_URL}" >>"${XBT_TARGET_MANIFEST}"
 
+unset _name # from xbt_src_get()
+ 
 if [[ -d "${XBT_LINUX}" && ! -d "linux" ]]; then
 	ln -s "${XBT_LINUX}" "linux"
 fi

@@ -49,7 +49,7 @@ return 0
 
 pkg_configure() {
 
-PKG_STATUS="Unspecified error -- check the ${PKG_NAME} build log"
+PKG_STATUS="./configure error"
 
 # The FHS recommends using the /var/lib/hwclock directory instead of the usual
 # /etc directory as the location for the adjtime file.  To make the hwclock
@@ -73,7 +73,9 @@ PKG_STATUS="Unspecified error -- check the ${PKG_NAME} build log"
 #  --disable-libmount      do not build libmount
 
 # freak-ass magic from https://lkml.org/lkml/2012/2/24/337
-# => scanf_cv_alloc_modifier=as ./configure ...
+# => scanf_cv_alloc_modifier=as  GNU extension to alloc mem for string [evil]
+# => scanf_cv_alloc_modifier=ms  POSIX way to alloc mem for string
+# => scanf_cv_alloc_modifier=no  maybe: do not alloc mem for string?
 
 cd "${PKG_NAME}-${PKG_VERSION}"
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_set"
@@ -88,7 +90,7 @@ RANLIB="${XBT_RANLIB}" \
 SIZE="${XBT_SIZE}" \
 STRIP="${XBT_STRIP}" \
 CFLAGS="${TTYLINUX_CFLAGS}" \
-scanf_cv_alloc_modifier=as \
+scanf_cv_alloc_modifier=ms \
 ./configure \
 	--build=${MACHTYPE} \
 	--host=${XBT_TARGET} \
@@ -109,7 +111,7 @@ scanf_cv_alloc_modifier=as \
 	--disable-unshare \
 	--disable-wall \
 	--disable-makeinstall-chown \
-	--without-ncurses
+	--without-ncurses || return 1
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_clr"
 cd ..
 
@@ -125,11 +127,13 @@ return 0
 
 pkg_make() {
 
-PKG_STATUS="Unspecified error -- check the ${PKG_NAME} build log"
+PKG_STATUS="make error"
 
 cd "${PKG_NAME}-${PKG_VERSION}"
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_set"
-PATH="${XBT_BIN_PATH}:${PATH}" make --jobs=${NJOBS} CROSS_COMPILE=${XBT_TARGET}-
+PATH="${XBT_BIN_PATH}:${PATH}" make \
+	--jobs=${NJOBS} \
+	CROSS_COMPILE=${XBT_TARGET}- || return 1
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_clr"
 cd ..
 
@@ -145,7 +149,7 @@ return 0
 
 pkg_install() {
 
-PKG_STATUS="Unspecified error -- check the ${PKG_NAME} build log"
+PKG_STATUS="install error"
 
 cd "${PKG_NAME}-${PKG_VERSION}"
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_set"
@@ -156,7 +160,7 @@ mkdir "${_stageDir}"
 PATH="${XBT_BIN_PATH}:${PATH}" make \
 	CROSS_COMPILE=${XBT_TARGET}- \
 	DESTDIR=${_stageDir} \
-	install
+	install || return 1
 
 _dest="${TTYLINUX_SYSROOT_DIR}"
 install --directory --mode=755 --group=0 --owner=0 ${_dest}/usr/include/blkid/

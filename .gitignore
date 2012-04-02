@@ -28,6 +28,7 @@ ttylinux-build/doc/temp.*
 ttylinux-build/img/[^.]*
 ttylinux-build/mnt/[^.]*
 ttylinux-build/pkg-bin/[^.]*
+ttylinux-build/pkg-cfg/glibc-devel-2.14/files-*
 ttylinux-build/pkg-src/[^.]*
 ttylinux-build/site/[^.]*
 ttylinux-build/sysroot/[^.]*

@@ -36,6 +36,7 @@
 #
 # CHANGE LOG
 #
+#	24mar12	drj	Added fix for mixed implicit and normal rules.
 #	19feb12	drj	Added text manifest of tool chain components.
 #	11feb12	drj	Bash assault; nicked from Yann E. MORIN
 #	11feb12	drj	Get features.h into ${INCLDIR}/
@@ -137,42 +138,45 @@ xbt_debug_break ""
 #
 xbt_src_get ${XBT_LIBC} "${XBT_XSRC_DIR}"
 #
-echo -n "${XBT_LIBC} " >>"${XBT_TOOLCHAIN_MANIFEST}"
-echo -n "${XBT_LIBC} " >>"${XBT_TARGET_MANIFEST}"
-for ((i=(40-${#XBT_LIBC}) ; i > 0 ; i--)) do
+echo -n "${_name} " >>"${XBT_TOOLCHAIN_MANIFEST}"
+echo -n "${_name} " >>"${XBT_TARGET_MANIFEST}"
+for ((i=(40-${#_name}) ; i > 0 ; i--)) do
         echo -n "." >>"${XBT_TOOLCHAIN_MANIFEST}"
         echo -n "." >>"${XBT_TARGET_MANIFEST}"
 done
 echo " ${XBT_LIBC_URL}" >>"${XBT_TOOLCHAIN_MANIFEST}"
 echo " ${XBT_LIBC_URL}" >>"${XBT_TARGET_MANIFEST}"
+unset _name # from xbt_src_get()
 #
 case "${XBT_LINUX_ARCH}" in
 	arm)	echo "${XBT_LINUX_ARCH}: Getting ports for ${XBT_LIBC}"
 		xbt_src_get ${XBT_LIBC_P} "${XBT_XSRC_DIR}"
 		mv -v ${XBT_LIBC_P} ${XBT_LIBC}/ports
 		#
-		echo -n "${XBT_LIBC_P} " >>"${XBT_TOOLCHAIN_MANIFEST}"
-		echo -n "${XBT_LIBC_P} " >>"${XBT_TARGET_MANIFEST}"
+		echo -n "${_name} " >>"${XBT_TOOLCHAIN_MANIFEST}"
+		echo -n "${_name} " >>"${XBT_TARGET_MANIFEST}"
 		for ((i=(40-${#XBT_LIBC_P}) ; i > 0 ; i--)) do
         		echo -n "." >>"${XBT_TOOLCHAIN_MANIFEST}"
         		echo -n "." >>"${XBT_TARGET_MANIFEST}"
 		done
 		echo " ${XBT_LIBC_P_URL}" >>"${XBT_TOOLCHAIN_MANIFEST}"
 		echo " ${XBT_LIBC_P_URL}" >>"${XBT_TARGET_MANIFEST}"
+		unset _name # from xbt_src_get()
 		#
 		;;
 	mips)	echo "${XBT_LINUX_ARCH}: Getting ports for ${XBT_LIBC}"
 		xbt_src_get ${XBT_LIBC_P} "${XBT_XSRC_DIR}"
 		mv -v ${XBT_LIBC_P} ${XBT_LIBC}/ports
 		#
-		echo -n "${XBT_LIBC_P} " >>"${XBT_TOOLCHAIN_MANIFEST}"
-		echo -n "${XBT_LIBC_P} " >>"${XBT_TARGET_MANIFEST}"
+		echo -n "${_name} " >>"${XBT_TOOLCHAIN_MANIFEST}"
+		echo -n "${_name} " >>"${XBT_TARGET_MANIFEST}"
 		for ((i=(40-${#XBT_LIBC_P}) ; i > 0 ; i--)) do
         		echo -n "." >>"${XBT_TOOLCHAIN_MANIFEST}"
         		echo -n "." >>"${XBT_TARGET_MANIFEST}"
 		done
 		echo " ${XBT_LIBC_P_URL}" >>"${XBT_TOOLCHAIN_MANIFEST}"
 		echo " ${XBT_LIBC_P_URL}" >>"${XBT_TARGET_MANIFEST}"
+		unset _name # from xbt_src_get()
 		#
 		;;
 esac
@@ -192,6 +196,12 @@ for p in ${XBT_PATCH_DIR}/${XBT_LIBC}-*.patch; do
 	fi
 done; unset p
 cd ..
+
+# Fix a problem with mixed implicit and normal rules.
+#
+if [[ "${XBT_LIBC#*-}" == "2.9" ]]; then
+	sed -i 's/ot \$/ot:\n\ttouch $@\n\n$/' ${XBT_LIBC}/manual/Makefile
+fi
 
 # The GLIBC documentation recommends building GLIBC outside of the source
 # directory in a dedicated build directory.
@@ -347,22 +357,33 @@ xbt_debug_break ""
 # Find, uncompress and untarr ${XBT_LIBC}.
 #
 xbt_src_get ${XBT_LIBC}
+unset _name
 case "${XBT_LINUX_ARCH}" in
 	arm)	echo "${XBT_LINUX_ARCH}: Getting ports for ${XBT_LIBC}"
 		xbt_src_get ${XBT_LIBC_P}
+		unset _name
 		mv -v ${XBT_LIBC_P} ${XBT_LIBC}/ports
 		;;
 	mips)	echo "${XBT_LINUX_ARCH}: Getting ports for ${XBT_LIBC}"
 		xbt_src_get ${XBT_LIBC_P}
+		unset _name
 		mv -v ${XBT_LIBC_P} ${XBT_LIBC}/ports
 		;;
 esac
 
+# Use any patches.
+#
 cd ${XBT_LIBC}
 for p in ${XBT_PATCH_DIR}/${XBT_LIBC}-*.patch; do
 	if [[ -f "${p}" ]]; then patch -Np1 -i "${p}"; fi
 done; unset p
 cd ..
+
+# Fix a problem with mixed implicit and normal rules.
+#
+if [[ "${XBT_LIBC#*-}" == "2.9" ]]; then
+	sed -i 's/ot \$/ot:\n\ttouch $@\n\n$/' ${XBT_LIBC}/manual/Makefile
+fi
 
 # The GLIBC documentation recommends building GLIBC outside of the source
 # directory in a dedicated build directory.

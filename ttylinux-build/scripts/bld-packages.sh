@@ -29,6 +29,7 @@
 #
 # CHANGE LOG
 #
+#	26mar12	drj	Added support for xz decompressin of source tarballs.
 #	16mar12	drj	Changed the package done flags' location.
 #	16mar12	drj	Even better setting NJOBS.
 #	08mar12	drj	Better setting NJOBS.
@@ -89,6 +90,11 @@ fi
 if [[ -f "${TTYLINUX_PKGSRC_DIR}/${srcPkg}.tar.bz2" ]]; then
 	tarBall="${srcPkg}.tar.bz2"
 	unZipper="bunzip2 --force"
+fi
+
+if [[ -f "${TTYLINUX_PKGSRC_DIR}/${srcPkg}.tar.xz" ]]; then
+	tarBall="${srcPkg}.tar.xz"
+	unZipper="xz --decompress --force"
 fi
 
 if [[ -n "${tarBall}" ]]; then
@@ -252,22 +258,19 @@ bitch=${ncpus:-1}
 [[ -z "${bitch//[0-9]}" ]] && NJOBS=$((${bitch:-1} + 1)) || NJOBS=2
 unset bitch
 echo -n "b." >&${CONSOLE_FD}
-pkg_patch     $1
-pkg_configure $1
-pkg_make      $1
-pkg_install   $1
+[[ -z "${PKG_STATUS}" ]] && pkg_patch     $1
+[[ -z "${PKG_STATUS}" ]] && pkg_configure $1
+[[ -z "${PKG_STATUS}" ]] && pkg_make      $1
+[[ -z "${PKG_STATUS}" ]] && pkg_install   $1
 unset NJOBS
 if [[ -n "${PKG_STATUS}" ]]; then
+	echo "ERROR ***** ${PKG_STATUS}" # Make a log file entry.
+	echo -e "${TEXT_BRED}ERROR${TEXT_NORM}" >&${CONSOLE_FD}
+	echo    "E> ${PKG_STATUS}"              >&${CONSOLE_FD}
 	pkg_clean # Call function pkg_clean from "bld.sh".
 	rm --force INSTALL_STAMP
 	rm --force FILES
-	echo "E> Package error: ${PKG_STATUS}" >&2
-	return 1
-fi
-if [[ x"${TTYLINUX_SITE_SCRIPTS:-}" == x"y" ]]; then
-	if [[ -x "${TTYLINUX_SITE_DIR}/pkg_build.sh" ]]; then
-		("${TTYLINUX_SITE_DIR}/pkg_build.sh" $1)
-	fi
+	exit 1 # Bust out of sub-shell.
 fi
 unset PKG_STATUS
 
@@ -517,12 +520,10 @@ echo ""
 pushd "${TTYLINUX_BUILD_DIR}/packages" >/dev/null 2>&1
 
 if [[ $(ls -1 | wc -l) -ne 0 ]]; then
-	echo "packages build directory is not empty:"
+	echo "w> build/packages build directory is not empty:"
 	ls -l
 	echo ""
 fi
-
-#trap "rm --force --recursive ${TTYLINUX_BUILD_DIR}/packages/"* EXIT
 
 T1P=${SECONDS}
 
@@ -539,22 +540,31 @@ for p in ${TTYLINUX_PACKAGE[@]}; do
 	exec 4>&1    # Save stdout at fd 4.
 	CONSOLE_FD=4 #
 
+	set +e ; # Let a build step fail without exiting this script.
+
 	if [[ -d "${TTYLINUX_PKGCFG_DIR}/${p}" ]]; then
+		(
 		rm --force "${TTYLINUX_VAR_DIR}/log/${p}.log"
 		package_xbuild  "${p}" >>"${TTYLINUX_VAR_DIR}/log/${p}.log" 2>&1
 		manpage_compress       >>"${TTYLINUX_VAR_DIR}/log/${p}.log" 2>&1
 		package_collect "${p}" >>"${TTYLINUX_VAR_DIR}/log/${p}.log" 2>&1
-		BUILD_MASK=""
+		)
 	fi
+
+	if [[ $? -ne 0 ]]; then
+		echo "Check the build log files.  Probably check:"
+		echo "=> ${TTYLINUX_VAR_DIR}/log/${p}.log"
+		exit 1
+	fi
+
+	set -e ; # All done with build steps; fail enabled.
 
 	exec >&4     # Set fd 1 back to stdout.
 	CONSOLE_FD=1 #
 
 	if [[ ! -d "${TTYLINUX_PKGCFG_DIR}/${p}" ]]; then
-		echo -e -n "${TEXT_BRED}ERROR${TEXT_NORM}"
-		echo -e    " no ${TEXT_RED}pkg-cfg/${p}${TEXT_NORM} directory"
-		echo       "Check the build log files.  Probably check:"
-		echo       "=> ${TTYLINUX_VAR_DIR}/log/${p}.log"
+		echo -e "${TEXT_BRED}ERROR${TEXT_NORM}"
+		echo -e " no ${TEXT_RED}pkg-cfg/${p}${TEXT_NORM} directory"
 		exit 1
 	fi
 
@@ -568,19 +578,18 @@ for p in ${TTYLINUX_PACKAGE[@]}; do
 	[[ ${#secs} -eq 1 ]] && echo -n " "; echo -n "${secs} seconds"
 	echo "]"
 
+	if [[ $(ls -1 | wc -l) -ne 0 ]]; then
+		echo "w> build/packages build directory is not empty:"
+		ls -l
+	fi
+
+	BUILD_MASK=""
+
 done
 
 T2P=${SECONDS}
 echo "=> $(((${T2P}-${T1P})/60)) minutes $(((${T2P}-${T1P})%60)) seconds"
 echo ""
-
-#trap - EXIT
-
-if [[ $(ls -1 | wc -l) -ne 0 ]]; then
-	echo "packages build directory is not empty:"
-	ls -l
-	echo ""
-fi
 
 popd >/dev/null 2>&1
 

@@ -64,7 +64,7 @@ pkg_configure() {
 
 local TERMCAP_LIB="gnutermcap"
 
-PKG_STATUS="Unspecified error -- check the ${PKG_NAME} build log"
+PKG_STATUS="./configure error"
 
 if [[ x"${TTYLINUX_PACKAGE_NCURSES_HAS_LIBS:-}" == x"y" ]]; then
 	TERMCAP_LIB="libcurses"
@@ -92,7 +92,7 @@ bash_cv_termcap_lib=${TERMCAP_LIB} \
 	--prefix=/usr \
 	--enable-job-control \
 	--disable-nls \
-	--without-bash-malloc
+	--without-bash-malloc || return 1
 # ac_cv_func_setvbuf_reversed=no
 # ac_cv_have_decl_sys_siglist=yes
 # bash_cv_decl_under_sys_siglist=yes
@@ -120,11 +120,13 @@ return 0
 
 pkg_make() {
 
-PKG_STATUS="Unspecified error -- check the ${PKG_NAME} build log"
+PKG_STATUS="make error"
 
 cd "${PKG_NAME}-${PKG_VERSION}"
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_set"
-PATH="${XBT_BIN_PATH}:${PATH}" make --jobs=${NJOBS} CROSS_COMPILE=${XBT_TARGET}-
+PATH="${XBT_BIN_PATH}:${PATH}" make \
+	--jobs=${NJOBS} \
+	CROSS_COMPILE=${XBT_TARGET}- || return 1
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_clr"
 cd ..
 

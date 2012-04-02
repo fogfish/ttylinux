@@ -53,7 +53,7 @@ pkg_configure() {
 
 local ENABLE_BFD64=""
 
-PKG_STATUS="Unspecified error -- check the ${PKG_NAME} build log"
+PKG_STATUS="./configure error"
 
 cd "build-binutils"
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_set"
@@ -79,7 +79,7 @@ CFLAGS="${TTYLINUX_CFLAGS}" \
 	${ENABLE_BFD64} \
 	--enable-shared \
 	--disable-nls \
-	--disable-multilib
+	--disable-multilib || return 1
 
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_clr"
 cd ..
@@ -96,11 +96,13 @@ return 0
 
 pkg_make() {
 
-PKG_STATUS="Unspecified error -- check the ${PKG_NAME} build log"
+PKG_STATUS="make error"
 
 cd "build-binutils"
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_set"
-PATH="${XBT_BIN_PATH}:${PATH}" make --jobs=${NJOBS} CROSS_COMPILE=${XBT_TARGET}-
+PATH="${XBT_BIN_PATH}:${PATH}" make \
+	--jobs=${NJOBS} \
+	CROSS_COMPILE=${XBT_TARGET}- || return 1
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_clr"
 cd ..
 
@@ -116,11 +118,13 @@ return 0
 
 pkg_install() {
 
-PKG_STATUS="Unspecified error -- check the ${PKG_NAME} build log"
+PKG_STATUS="make install error"
 
 cd "build-binutils"
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_set"
-PATH="${XBT_BIN_PATH}:${PATH}" make DESTDIR=${TTYLINUX_SYSROOT_DIR} install
+PATH="${XBT_BIN_PATH}:${PATH}" make \
+	DESTDIR=${TTYLINUX_SYSROOT_DIR} \
+	install || return 1
 install --mode=644 --owner=0 --group=0 \
 	"../${PKG_NAME}-${PKG_VERSION}/include/libiberty.h" \
 	"${TTYLINUX_SYSROOT_DIR}/usr/include/"
@@ -143,12 +147,9 @@ return 0
 # ******************************************************************************
 
 pkg_clean() {
-
-PKG_STATUS="Unspecified error -- check the ${PKG_NAME} build log"
-rm --force --recursive "build-binutils"
 PKG_STATUS=""
+rm --force --recursive "build-binutils"
 return 0
-
 }
 
 

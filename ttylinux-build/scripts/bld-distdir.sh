@@ -94,6 +94,7 @@ mkdir --mode=755 "sdcard/"
 mkdir --mode=755 "sdcard/boot/"
 mkdir --mode=755 "sdcard/config/"
 mkdir --mode=755 "sdcard/doc/"
+mkdir --mode=755 "sdcard/logs/"
 mkdir --mode=755 "sdcard/packages/"
 echo "DONE"
 
@@ -160,6 +161,12 @@ cp ${TTYLINUX_PKGBIN_DIR}/* sdcard/packages/
 chmod 644 sdcard/packages/*
 echo "DONE"
 
+echo -n "i> Getting the build logs ............................ "
+cp ${TTYLINUX_VAR_DIR}/log/* sdcard/logs/
+xz --compress sdcard/logs/*
+chmod 644 sdcard/logs/*
+echo "DONE"
+
 popd >/dev/null 2>&1
 
 return 0
@@ -196,6 +203,7 @@ mkdir --mode=755 "cdrom/"
 mkdir --mode=755 "cdrom/boot/"
 mkdir --mode=755 "cdrom/config/"
 mkdir --mode=755 "cdrom/doc/"
+mkdir --mode=755 "cdrom/logs/"
 mkdir --mode=755 "cdrom/packages/"
 mkdir --mode=755 "cdrom/ppc/"
 mkdir --mode=755 "cdrom/ppc/chrp/"
@@ -286,6 +294,12 @@ echo -n "i> Copying packages to Boot CD ....................... "
 cp ${TTYLINUX_PKGBIN_DIR}/* cdrom/packages/
 echo "DONE"
 
+echo -n "i> Getting the build logs ............................ "
+cp ${TTYLINUX_VAR_DIR}/log/* cdrom/logs/
+xz --compress cdrom/logs/*
+chmod 644 cdrom/logs/*
+echo "DONE"
+
 popd >/dev/null 2>&1
 
 return 0
@@ -324,6 +338,7 @@ mkdir --mode=755 "cdrom/boot/grub"
 mkdir --mode=755 "cdrom/boot/isolinux/"
 mkdir --mode=755 "cdrom/config/"
 mkdir --mode=755 "cdrom/doc/"
+mkdir --mode=755 "cdrom/logs/"
 mkdir --mode=755 "cdrom/packages/"
 echo "DONE"
 
@@ -412,6 +427,12 @@ echo "DONE"
 
 echo -n "i> Copying packages to Boot CD ....................... "
 cp ${TTYLINUX_PKGBIN_DIR}/* cdrom/packages/
+echo "DONE"
+
+echo -n "i> Getting the build logs ............................ "
+cp ${TTYLINUX_VAR_DIR}/log/* cdrom/logs/
+xz --compress cdrom/logs/*
+chmod 644 cdrom/logs/*
 echo "DONE"
 
 popd >/dev/null 2>&1
@@ -515,6 +536,7 @@ mkdir --mode=755 "cdrom/"
 mkdir --mode=755 "cdrom/boot/"
 mkdir --mode=755 "cdrom/config/"
 mkdir --mode=755 "cdrom/doc/"
+mkdir --mode=755 "cdrom/logs/"
 mkdir --mode=755 "cdrom/packages/"
 echo "DONE"
 
@@ -617,6 +639,12 @@ echo "DONE"
 
 echo -n "i> Copying packages .................................. "
 cp ${TTYLINUX_PKGBIN_DIR}/* cdrom/packages/
+echo "DONE"
+
+echo -n "i> Getting the build logs ............................ "
+cp ${TTYLINUX_VAR_DIR}/log/* cdrom/logs/
+xz --compress cdrom/logs/*
+chmod 644 cdrom/logs/*
 echo "DONE"
 
 popd >/dev/null 2>&1

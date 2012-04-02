@@ -42,7 +42,7 @@ if [[ x"${ubootPatch}" != x"none" ]]; then
 	patchFile="p-${ubootVersion}-${TTYLINUX_PLATFORM}-${ubootPatch}.patch"
 	mkdir --mode=755 "${patchDir}"
 	cp "patch/${patchFile}" "${patchDir}"
-	echo "=> patch: ${patchFile}"
+	echo "=> patch: ${patchFile}" >>${manifest}
 	unset patchFile
 	unset patchDir
 fi

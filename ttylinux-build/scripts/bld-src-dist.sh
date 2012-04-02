@@ -110,10 +110,12 @@ for p in ${TTYLINUX_PACKAGE[@]}; do
 	if [[ -r "${srcPkgFile}" ]]; then
 		cp "${srcPkgFile}" "${destDir}"
 		echo -n " got it "
-		echo -n "${p} " >>${manifest}
-		for ((i=(40-${#p}) ; i > 0 ; i--)); do
+		_name=$(basename ${srcPkgFile})
+		echo -n "${_name} " >>${manifest}
+		for ((i=(40-${#_name}) ; i > 0 ; i--)); do
 			echo -n "." >>${manifest}
 		done
+		unset _name
 		(
 		. ${TTYLINUX_PKGCFG_DIR}/${p}/bld.sh
 		echo " ${PKG_URL}"
@@ -167,7 +169,7 @@ for file in "${TTYLINUX_XTOOL_DIR}/_pkg-src/"*; do
 	[[ -r "${file}" ]] && cp "${file}" "${destDir}" || true
 done
 
-cat "${TTYLINUX_XTOOL_DIR}/_pkg-src/manifest.txt" >>${manifest}
+cat "${TTYLINUX_XTOOL_DIR}/_pkg-src/_manifest.txt" >>${manifest}
 
 echo "DONE"
 
@@ -215,6 +217,29 @@ echo "DONE"
 }
 
 
+# *****************************************************************************
+# Make an HTML package list.
+# *****************************************************************************
+
+pkglist_html_make() {
+
+while read name stuff; do
+	[[ "${name}" == "=>" ]] && continue || true
+#	&#187;
+#	<a style="color:#07F"
+#	href="ftp://ftp.alsa-project.org/pub/lib/">
+#	alsa-lib-1.0.25</a><br/>
+	echo -n "&#187; "
+	echo -n "<a style=\"color:#07F\" "
+	echo -n "href=\"pkg-src/${name}\"> "
+	echo -n "${name}</a><br/>"
+	echo ""
+
+done <${manifest}
+
+}
+
+
 # *************************************************************************** #
 #                                                                             #
 # M A I N   P R O G R A M                                                     #
@@ -247,7 +272,7 @@ echo ""
 echo "##### START getting source packages"
 echo ""
 
-manifest="${TTYLINUX_BUILD_DIR}/sources/manifest.txt"
+manifest="${TTYLINUX_BUILD_DIR}/sources/_manifest.txt"
 
 echo -n "i> Recreating source package staging directory ....... "
 rm --force --recursive "${TTYLINUX_BUILD_DIR}/sources"
@@ -262,6 +287,7 @@ bootloader_sources_get
 package_sources_get
 toolchain_target_sources_get
 platform_config_get
+pkglist_html_make
 
 echo -n "i> Setting ownership and mode bits ................... "
 find "${TTYLINUX_BUILD_DIR}/sources" -type d -exec chmod 755 {} \;

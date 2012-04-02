@@ -36,6 +36,7 @@
 #
 # CHANGE LOG
 #
+#	27mar12	drj	Fixed to not link libgcc_s with libc.  My head hurts.
 #	19feb12	drj	Added text manifest of tool chain components.
 #	11feb12	drj	Minor fussing.
 #	10feb12	drj	Added libraries.
@@ -61,6 +62,7 @@ xbt_debug_break ""
 # Find, uncompress and untarr ${XBT_GMP}.
 #
 xbt_src_get ${XBT_GMP}
+unset _name
 
 # Make entry in the manifest.
 #
@@ -137,6 +139,7 @@ xbt_debug_break ""
 # Find, uncompress and untarr ${XBT_MPFR}.
 #
 xbt_src_get ${XBT_MPFR}
+unset _name
 
 # Make entry in the manifest.
 #
@@ -211,6 +214,7 @@ xbt_debug_break ""
 # Find, uncompress and untarr ${XBT_MPC}.
 #
 xbt_src_get ${XBT_MPC}
+unset _name
 
 # Make entry in the manifest.
 #
@@ -432,6 +436,7 @@ xbt_debug_break ""
 # Find, uncompress and untarr ${XBT_GCC}.
 #
 xbt_src_get ${XBT_GCC}
+unset _name
 
 # Make entry in the manifest.
 #
@@ -449,31 +454,14 @@ for p in ${XBT_PATCH_DIR}/${XBT_GCC}-*.patch; do
 done; unset p
 cd ..
 
-# Trust the header files and do not run fixinc.sh; the Linux kernel and GLIBC
-# header files should be good.
 # I don't trust what I see in gcc/Makefile.in; it seems to be able to refer to
 # the host header files for cross-built GCC. wtf?!
 #
 cd ${XBT_GCC}
-sed 's|\./fixinc\.sh|-c true|' -i gcc/Makefile.in
 _headerDir="${XBT_XTARG_DIR}/usr/include"
 sed -e "s|^\(CROSS_SYSTEM_HEADER_DIR =\).*|\1 ${_headerDir}|" -i gcc/Makefile.in
 unset _headerDir
 cd ..
-
-# GCC-4.4.4:
-# Suppress the installation of libiberty.a; it is provided by binutils.
-#
-if [[ "${XBT_GCC}" = "gcc-4.4.4" ]]; then
-	cd ${XBT_GCC}
-	sed -i 's/install_to_$(INSTALL_DEST) //' libiberty/Makefile.in
-	cd ..
-	CONFIGURE_DISABLES=""
-	CONFIGURE_WITHS="
---with-gmp=${XBT_XHOST_DIR}/usr \
---with-mpfr=${XBT_XHOST_DIR}/usr"
-	CONFIGURE_WITHOUTS=""
-fi
 
 # GCC-4.4.6:
 # Suppress the installation of libiberty.a; it is provided by binutils.
@@ -521,6 +509,8 @@ echo "# XBT_CONFIG **********"
 	--host=${XBT_HOST} \
 	--target=${XBT_TARGET} \
 	--prefix=${XBT_XHOST_DIR}/usr \
+	--infodir=${XBT_XHOST_DIR}/usr/share/info \
+	--mandir=${XBT_XHOST_DIR}/usr/share/man \
 	--enable-languages=c \
 	--enable-threads=no \
 	--disable-decimal-float \
@@ -532,11 +522,11 @@ echo "# XBT_CONFIG **********"
 	--disable-shared \
 	--disable-threads \
 	${CONFIGURE_DISABLES} \
-	${CONFIGURE_WITHS} \
 	--with-newlib \
 	--with-sysroot=${XBT_XTARG_DIR} \
-	${CONFIGURE_WITHOUTS} \
-	--without-headers || exit 1
+	${CONFIGURE_WITHS} \
+	--without-headers \
+	${CONFIGURE_WITHOUTS} || exit 1
 
 xbt_debug_break "configured ${XBT_GCC} for stage 1"
 
@@ -607,6 +597,7 @@ xbt_debug_break ""
 # Find, uncompress and untarr ${XBT_GCC}.
 #
 xbt_src_get ${XBT_GCC}
+unset _name
 
 cd ${XBT_GCC}
 for p in ${XBT_PATCH_DIR}/${XBT_GCC}-*.patch; do
@@ -614,31 +605,18 @@ for p in ${XBT_PATCH_DIR}/${XBT_GCC}-*.patch; do
 done; unset p
 cd ..
 
-# Trust the header files and do not run fixinc.sh; the Linux kernel and GLIBC
-# header files should be good.
 # I don't trust what I see in gcc/Makefile.in; it seems to be able to refer to
 # the host header files for cross-built GCC. wtf?!
 #
+# Avoid linking libgcc_s with libc as this can cause a startingly big headache
+# when host architecture matches target architecture.
+#
 cd ${XBT_GCC}
-sed 's|\./fixinc\.sh|-c true|' -i gcc/Makefile.in
 _headerDir="${XBT_XTARG_DIR}/usr/include"
 sed -e "s|^\(CROSS_SYSTEM_HEADER_DIR =\).*|\1 ${_headerDir}|" -i gcc/Makefile.in
 unset _headerDir
+sed -e "s|SHLIB_LC = -lc|SHLIB_LC =|" -i gcc/config/t-slibgcc-elf-ver
 cd ..
-
-# GCC-4.4.4:
-# Suppress the installation of libiberty.a; it is provided by binutils.
-#
-if [[ "${XBT_GCC}" = "gcc-4.4.4" ]]; then
-	cd ${XBT_GCC}
-	sed -i 's/install_to_$(INSTALL_DEST) //' libiberty/Makefile.in
-	cd ..
-	CONFIGURE_DISABLES=""
-	CONFIGURE_WITHS="
---with-gmp=${XBT_XHOST_DIR}/usr \
---with-mpfr=${XBT_XHOST_DIR}/usr"
-	CONFIGURE_WITHOUTS=""
-fi
 
 # GCC-4.4.6:
 # Suppress the installation of libiberty.a; it is provided by binutils.
@@ -687,6 +665,8 @@ echo "# XBT_CONFIG **********"
 	--host=${XBT_HOST} \
 	--target=${XBT_TARGET} \
 	--prefix=${XBT_XHOST_DIR}/usr \
+	--infodir=${XBT_XHOST_DIR}/usr/share/info \
+	--mandir=${XBT_XHOST_DIR}/usr/share/man \
 	--enable-languages=c \
 	--enable-shared \
 	${ENABLE_THREADS} \
@@ -696,8 +676,9 @@ echo "# XBT_CONFIG **********"
 	--disable-libssp \
 	--disable-multilib \
 	${CONFIGURE_DISABLES} \
-	${CONFIGURE_WITHS} \
+	--with-headers=${XBT_XTARG_DIR}/usr/include \
 	--with-sysroot=${XBT_XTARG_DIR} \
+	${CONFIGURE_WITHS} \
 	${CONFIGURE_WITHOUTS} || exit 1
 
 xbt_debug_break "configured ${XBT_GCC} for stage 2"
@@ -773,6 +754,7 @@ xbt_debug_break ""
 # Find, uncompress and untarr ${XBT_GCC}.
 #
 xbt_src_get ${XBT_GCC}
+unset _name
 
 cd ${XBT_GCC}
 for p in ${XBT_PATCH_DIR}/${XBT_GCC}-*.patch; do
@@ -780,31 +762,18 @@ for p in ${XBT_PATCH_DIR}/${XBT_GCC}-*.patch; do
 done; unset p
 cd ..
 
-# Trust the header files and do not run fixinc.sh; the Linux kernel and GLIBC
-# header files should be good.
 # I don't trust what I see in gcc/Makefile.in; it seems to be able to refer to
 # the host header files for cross-built GCC. wtf?!
 #
+# Avoid linking libgcc_s with libc as this can cause a startingly big headache
+# when host architecture matches target architecture.
+#
 cd ${XBT_GCC}
-sed 's|\./fixinc\.sh|-c true|' -i gcc/Makefile.in
 _headerDir="${XBT_XTARG_DIR}/usr/include"
 sed -e "s|^\(CROSS_SYSTEM_HEADER_DIR =\).*|\1 ${_headerDir}|" -i gcc/Makefile.in
 unset _headerDir
+sed -e "s|SHLIB_LC = -lc|SHLIB_LC =|" -i gcc/config/t-slibgcc-elf-ver
 cd ..
-
-# GCC-4.4.4:
-# Suppress the installation of libiberty.a; it is provided by binutils.
-#
-if [[ "${XBT_GCC}" = "gcc-4.4.4" ]]; then
-	cd ${XBT_GCC}
-	sed -i 's/install_to_$(INSTALL_DEST) //' libiberty/Makefile.in
-	cd ..
-	CONFIGURE_DISABLES=""
-	CONFIGURE_WITHS="
---with-gmp=${XBT_XHOST_DIR}/usr \
---with-mpfr=${XBT_XHOST_DIR}/usr"
-	CONFIGURE_WITHOUTS=""
-fi
 
 # GCC-4.4.6:
 # Suppress the installation of libiberty.a; it is provided by binutils.
@@ -831,27 +800,6 @@ if [[ "${XBT_GCC}" = "gcc-4.6.2" ]]; then
 --with-mpc=${XBT_XHOST_DIR}/usr"
 	CONFIGURE_WITHOUTS="--without-cloog --without-ppl"
 fi
-
-# Configure GCC for using only /lib and NOT /lib64 for x86_64.
-#
-cd "${XBT_GCC}"
-if [[ "${XBT_LINUX_ARCH}" = "x86_64" ]]; then
-	# Change GCC to use /lib   for 64-bit stuff, not /lib64
-	# Change GCC to use /lib32 for 32-bit stuff, not /lib
-	sed -e 's|/lib/ld-linux.so.2|/lib32/ld-linux.so.2|' \
-		-i gcc/config/i386/linux64.h
-	sed -e 's|/lib64/ld-linux-x86-64.so.2|/lib/ld-linux-x86-64.so.2|' \
-		-i gcc/config/i386/linux64.h
-	sed -e 's|../lib64|../lib|'   -i gcc/config/i386/t-linux64
-	sed -e 's|../lib)|../lib32)|' -i gcc/config/i386/t-linux64
-	# On x86_64, unsetting the multilib spec for GCC ensures that it won't
-	# attempt to link against libraries on the host.
-	for file in $(find gcc/config -name t-linux64) ; do
-		cp ${file} ${file}.orig
-		sed '/MULTILIB_OSDIRNAMES/d' ${file}.orig >${file}
-	done
-fi
-cd ..
 
 # The GCC documentation recommends building GCC outside of the source directory
 # in a dedicated build directory.
@@ -884,6 +832,8 @@ echo "# XBT_CONFIG **********"
 	--host=${XBT_HOST} \
 	--target=${XBT_TARGET} \
 	--prefix=${XBT_XHOST_DIR}/usr \
+	--infodir=${XBT_XHOST_DIR}/usr/share/info \
+	--mandir=${XBT_XHOST_DIR}/usr/share/man \
 	${ENABLE_LANGUAGES} \
 	--enable-c99 \
 	--enable-clocale=gnu \
@@ -898,8 +848,9 @@ echo "# XBT_CONFIG **********"
 	--disable-libstdcxx-pch \
 	--disable-multilib \
 	${CONFIGURE_DISABLES} \
-	${CONFIGURE_WITHS} \
+	--with-headers=${XBT_XTARG_DIR}/usr/include \
 	--with-sysroot=${XBT_XTARG_DIR} \
+	${CONFIGURE_WITHS} \
 	${CONFIGURE_WITHOUTS} || exit 1
 
 xbt_debug_break "configured ${XBT_GCC} for stage 3"

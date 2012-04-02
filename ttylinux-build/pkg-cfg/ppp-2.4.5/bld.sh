@@ -62,7 +62,7 @@ return 0
 
 pkg_configure() {
 
-PKG_STATUS="Unspecified error -- check the ${PKG_NAME} build log"
+PKG_STATUS="./configure error"
 
 cd "${PKG_NAME}-${PKG_VERSION}"
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_set"
@@ -80,7 +80,7 @@ CFLAGS="${TTYLINUX_CFLAGS}" \
 ./configure \
 	--build=${MACHTYPE} \
 	--host=${XBT_TARGET} \
-	--prefix=/usr
+	--prefix=/usr || return 1
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_clr"
 cd ..
 
@@ -96,15 +96,16 @@ return 0
 
 pkg_make() {
 
-PKG_STATUS="Unspecified error -- check the ${PKG_NAME} build log"
+PKG_STATUS="make error"
 
 cd "${PKG_NAME}-${PKG_VERSION}"
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_set"
-PATH="${XBT_BIN_PATH}:${PATH}" make --jobs=${NJOBS} \
+PATH="${XBT_BIN_PATH}:${PATH}" make \
+	--jobs=${NJOBS} \
 	AR=${XBT_AR} \
 	CC="${XBT_CC} --sysroot=${TTYLINUX_SYSROOT_DIR}" \
 	COPTS="${TTYLINUX_CFLAGS}" \
-	CROSS_COMPILE=${XBT_TARGET}-
+	CROSS_COMPILE=${XBT_TARGET}- || return 1
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_clr"
 cd ..
 

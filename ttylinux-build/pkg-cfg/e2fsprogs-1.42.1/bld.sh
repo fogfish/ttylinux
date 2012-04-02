@@ -49,11 +49,16 @@ return 0
 
 pkg_configure() {
 
-local ENABLE_DEFRAG="--enable-defrag"
+local CONFIG_BLKID="--disable-libblkid"
+local CONFIG_DEFRAG="--enable-defrag"
+local TTYLINUX_LDFLAGS="-lblkid"
 
-PKG_STATUS="Unspecified error -- check the ${PKG_NAME} build log"
+PKG_STATUS="./configure error"
 
-[[ "${TTYLINUX_PLATFORM}" == "wrtu54g_tm" ]] && ENABLE_DEFRAG="--disable-defrag"
+[[ "${TTYLINUX_PLATFORM}" == "pc_i486"    ]] && CONFIG_BLKID="--enable-libblkid"
+[[ "${TTYLINUX_PLATFORM}" == "wrtu54g_tm" ]] && CONFIG_BLKID="--enable-libblkid"
+[[ "${TTYLINUX_PLATFORM}" == "wrtu54g_tm" ]] && CONFIG_DEFRAG="--disable-defrag"
+[[ "${TTYLINUX_PLATFORM}" == "pc_i486"    ]] && TTYLINUX_LDFLAGS=""
 
 cd "${PKG_NAME}-${PKG_VERSION}"
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_set"
@@ -68,19 +73,20 @@ RANLIB="${XBT_RANLIB}" \
 SIZE="${XBT_SIZE}" \
 STRIP="${XBT_STRIP}" \
 CFLAGS="${TTYLINUX_CFLAGS}" \
-LDFLAGS="-lblkid" \
+LDFLAGS="${TTYLINUX_LDFLAGS}" \
 ./configure \
 	--build=${MACHTYPE} \
 	--host=${XBT_TARGET} \
 	--prefix=/usr \
 	--with-root-prefix="" \
+	${CONFIG_BLKID} \
+	${CONFIG_DEFRAG} \
 	--enable-fsck \
 	--enable-libuuid \
 	--enable-option-checking \
 	--enable-rpath \
 	--enable-tls \
 	--enable-verbose-makecmds \
-	${ENABLE_DEFRAG} \
 	--disable-blkid-debug \
 	--disable-bsd-shlibs \
 	--disable-checker \
@@ -90,13 +96,12 @@ LDFLAGS="-lblkid" \
 	--disable-elf-shlibs \
 	--disable-imager \
 	--disable-jbd-debug \
-	--disable-libblkid \
 	--disable-maintainer-mode \
 	--disable-nls \
 	--disable-profile \
 	--disable-resizer \
 	--disable-testio-debug \
-	--disable-uuidd
+	--disable-uuidd || return 1
 
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_clr"
 cd ..
@@ -113,11 +118,13 @@ return 0
 
 pkg_make() {
 
-PKG_STATUS="Unspecified error -- check the ${PKG_NAME} build log"
+PKG_STATUS="make error"
 
 cd "${PKG_NAME}-${PKG_VERSION}"
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_set"
-PATH="${XBT_BIN_PATH}:${PATH}" make --jobs=${NJOBS} CROSS_COMPILE=${XBT_TARGET}-
+PATH="${XBT_BIN_PATH}:${PATH}" make \
+	--jobs=${NJOBS} \
+	CROSS_COMPILE=${XBT_TARGET}- || return 1
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_clr"
 cd ..
 
@@ -133,12 +140,16 @@ return 0
 
 pkg_install() {
 
-PKG_STATUS="Unspecified error -- check the ${PKG_NAME} build log"
+PKG_STATUS="make install error"
 
 cd "${PKG_NAME}-${PKG_VERSION}"
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_set"
-PATH="${XBT_BIN_PATH}:${PATH}" make DESTDIR=${TTYLINUX_SYSROOT_DIR} install
-PATH="${XBT_BIN_PATH}:${PATH}" make DESTDIR=${TTYLINUX_SYSROOT_DIR} install-libs
+PATH="${XBT_BIN_PATH}:${PATH}" make \
+	DESTDIR=${TTYLINUX_SYSROOT_DIR} \
+	install || return 1
+PATH="${XBT_BIN_PATH}:${PATH}" make \
+	DESTDIR=${TTYLINUX_SYSROOT_DIR} \
+	install-libs || return 1
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_clr"
 cd ..
 

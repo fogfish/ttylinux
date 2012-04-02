@@ -84,11 +84,8 @@ LINUX="linux-3.1"
 # target triplet          linux kernel
 # components              architecture   glibc compile flags
 # ----------------------- -------------- -------------------------------------
-TARGET="armv5tej-gnueabi" ARCH="arm"     CFLAGS=""
-TARGET="armv7-gnueabi"    ARCH="arm"     CFLAGS=""
-TARGET="armv7-gnueabi"    ARCH="arm"     CFLAGS="-march=armv7-a -mcpu=cortex-a8"
+TARGET="armv7-gnueabi"    ARCH="arm"     CFLAGS="-mcpu=cortex-a8"
 TARGET="mipsel-uclibc"    ARCH="mips"    CFLAGS="-march=mips32 -mtune=mips32"
-TARGET="mipsel-gnu"       ARCH="mips"    CFLAGS="-march=mips32 -mtune=mips32"
 TARGET="powerpc-gnu"      ARCH="powerpc" CFLAGS="-mcpu=powerpc -mtune=powerpc"
 TARGET="i486-gnu"         ARCH="i386"    CFLAGS="-march=i486 -mtune=i486"
 TARGET="i686-gnu"         ARCH="i386"    CFLAGS="-march=i686 -mtune=generic"

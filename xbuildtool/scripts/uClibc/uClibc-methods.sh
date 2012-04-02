@@ -122,14 +122,16 @@ xbt_debug_break ""
 #
 xbt_src_get ${XBT_LIBC} "${XBT_XSRC_DIR}"
 #
-echo -n "${XBT_LIBC} " >>"${XBT_TOOLCHAIN_MANIFEST}"
-echo -n "${XBT_LIBC} " >>"${XBT_TARGET_MANIFEST}"
-for ((i=(40-${#XBT_LIBC}) ; i > 0 ; i--)) do
+echo -n "${_name} " >>"${XBT_TOOLCHAIN_MANIFEST}"
+echo -n "${_name} " >>"${XBT_TARGET_MANIFEST}"
+for ((i=(40-${#_name}) ; i > 0 ; i--)) do
         echo -n "." >>"${XBT_TOOLCHAIN_MANIFEST}"
         echo -n "." >>"${XBT_TARGET_MANIFEST}"
 done
 echo " ${XBT_LIBC_URL}" >>"${XBT_TOOLCHAIN_MANIFEST}"
 echo " ${XBT_LIBC_URL}" >>"${XBT_TARGET_MANIFEST}"
+#
+unset _name # from xbt_src_get()
 #
 _cfg="${XBT_LIBC}-${XBT_TARGET%%-*}.cfg"
 cp "${XBT_CONFIG_DIR}/${_cfg}" "${XBT_XSRC_DIR}"
@@ -252,6 +254,7 @@ xbt_debug_break ""
 # Find, uncompress and untarr ${XBT_LIBC}.
 #
 xbt_src_get ${XBT_LIBC}
+unset _name
 
 # Get the uClibc config file.  Set the KERNEL_HEADERS to the right place.
 #

@@ -31,7 +31,7 @@ _GLIBC_P[1]="glibc-ports-2.13"
 _GLIBC_P[2]="glibc-ports-2.14"
 
 _GLIBC_P_MD5SUM[0]="7d5d86031cb15403e4d246658209ee81"
-_GLIBC_P_MD5SUM[1]="483f37cfdd619e81d8ca9e9d713944b5"
+_GLIBC_P_MD5SUM[1]="b46326ade3b20c2f5af5962bee97a455"
 _GLIBC_P_MD5SUM[2]="b46326ade3b20c2f5af5962bee97a455"
 
 _GLIBC_P_URL[0]="ftp://ftp.gnu.org/gnu/glibc http://ftp.gnu.org/gnu/glibc ftp://sourceware.org/pub/glibc/releases/"

@@ -53,6 +53,14 @@
 #
 # CHANGE LOG
 #
+#	31mar12	drj	xbt_src_get gives the actual file name.
+#	27mar12	drj	Take away ".install" files from host/usr/include/.
+#	27mar12	drj	Merged host lib, lib32 and lib64 directories.
+#	27mar12	drj	Added continuation.
+#	26mar12	drj	Added to "g" (go) and "s" (skip) xbt_debug_break.
+#	25mar12	drj	Added ability to skip an md5sum check.
+#	25mar12	drj	Added xbt_debug_break() for stepping through a build.
+#	24mar12	drj	Before building, remove anything in the build directory.
 #	18mar12	drj	Track the failed package downloads and report on them.
 #	14mar12	drj	Made a better ncpus setting.
 #	24feb12	drj	Remove <path>/.. from CROSS_TOOL_DIR.
@@ -86,15 +94,41 @@ G_NMISSING=0
 # xbt_debug_break
 # *****************************************************************************
 
+# This wacky function does the pause between build steps; it may read input and
+# change the stepping behavior based upon the user input.
+#
+# This function must be given an argument; this argument is displayed to the
+# terminal standard output.  An empty argument, "", can be used.
+#
+# The value of XBT_STEP is the stepping state.
+# XBT_STEP is unset or empty ... there is no stepping and the state of stepping
+#                                is not changed while the script is executing
+# XBT_STEP is "yes" ............ there is a pause with any non-empty argument
+# XBT_STEP is "skp" ............ there is no pause until after an empty argument
+#
+# The stepping behavior is changed based upon the argument and the user input:
+# empty argument, "" ........... stepping in all cases is resumed
+# user gives "g" ............... stepping is turned off; no more stepping (go)
+# user gives "s" ............... stepping is turned off until empty argument
+
 xbt_debug_break() {
 
-if [[ x"${XBT_DEBUG:-no}" = x"yes" ]]; then
+if [[ x"${XBT_STEP:-no}" == x"yes" ||
+      x"${XBT_STEP:-no}" == x"skp" ]]; then
 	local prompt="${1:0:40}" # No more than 40 characters.
 	if [[ -z "${prompt}" ]]; then
 		echo "" >&${CONSOLE_FD}
+		XBT_STEP=yes
 	else
-		printf "** %40s ->" "${prompt}" >&${CONSOLE_FD}
-		read
+		printf "** %40s" "${prompt}" >&${CONSOLE_FD}
+		if [[ ${XBT_STEP} == "yes" ]]; then
+			echo -n " ->" >&${CONSOLE_FD}
+			read
+			[[ "${REPLY}" == "g" ]] && XBT_STEP=no  || true
+			[[ "${REPLY}" == "s" ]] && XBT_STEP=skp || true
+		else
+			echo "" >&${CONSOLE_FD}
+		fi
 	fi
 fi
 
@@ -124,7 +158,7 @@ shift # Go to the urls.
 pushd "${XBT_SOURCE_DIR}" >/dev/null 2>&1
 
 echo -n "i> Checking ${fileName} "
-for ((i=(21-${#fileName}) ; i > 0 ; i--)); do echo -n "."; done
+for ((i=(22-${#fileName}) ; i > 0 ; i--)); do echo -n "."; done
 
 rm -f "${fileName}.download.log"
 
@@ -133,8 +167,8 @@ rm -f "${fileName}.download.log"
 for ext in ${K_EXT}; do
 	[[ -f "${fileName}${ext}" ]] && haveFile="yes" || true
 done
-if [[ "${haveFile}" = "yes" ]]; then
-	echo " have it."
+if [[ "${haveFile}" == "yes" ]]; then
+	echo " have it"
 	popd >/dev/null 2>&1
 	return 0
 fi
@@ -149,7 +183,7 @@ for ext in ${K_EXT}; do
 		[[ -f "${fileName}${ext}" ]] && loadedDn="yes" || true
 	fi
 done
-if [[ "${loadedDn}" = "yes" ]]; then
+if [[ "${loadedDn}" == "yes" ]]; then
 	echo "(got from local cache)"
 	popd >/dev/null 2>&1
 	return 0
@@ -174,7 +208,7 @@ rm -f "${fileName}.download.log"
 for ext in ${K_EXT}; do
 	for url in "$@"; do
 		_file="${url}/${fileName}${ext}"
-		if [[ "${loadedDn}" = "no" ]]; then
+		if [[ "${loadedDn}" == "no" ]]; then
 			(${_wget} --passive-ftp "${_file}" \
 			|| ${_wget} "${_file}" \
 			|| true) >>"${fileName}.download.log" 2>&1
@@ -185,7 +219,7 @@ done
 unset _wget
 unset _file
 
-if [[ "${loadedDn}" = "yes" ]]; then
+if [[ "${loadedDn}" == "yes" ]]; then
 	echo "done."
 	rm -f "${fileName}.download.log"
 else
@@ -228,7 +262,7 @@ pushd "${XBT_SOURCE_DIR}" >/dev/null 2>&1
 for ext in ${K_EXT}; do
 	[[ -f "${fileName}${ext}" ]] && loadedDn="${fileName}${ext}" || true
 done
-if [[ "${loadedDn}" = "no" ]]; then
+if [[ "${loadedDn}" == "no" ]]; then
 	echo "E> Missing ${fileName} file."
 	popd >/dev/null 2>&1
 	return 0
@@ -245,15 +279,19 @@ fi
 # Check the md5sum and report.
 #
 echo -n "=> md5sum ${loadedDn} "
-for ((i=(26-${#loadedDn}) ; i > 0 ; i--)); do echo -n "."; done
-chksum=$(md5sum ${loadedDn} | awk '{print $1;}')
-if [[ "${chksum}" = "${fileCsum}" ]]; then
-	echo " OK (${chksum})"
+for ((i=(28-${#loadedDn}) ; i > 0 ; i--)); do echo -n "."; done
+if [[ "${fileCsum}" == "(skip)" ]]; then
+		echo " not checked"
 else
-	echo " MISMATCH"
-	echo "=> expected ..... ${fileCsum}"
-	echo "=> calculated ... ${chksum}"
-	K_ERR=1
+	chksum=$(md5sum ${loadedDn} | awk '{print $1;}')
+	if [[ "${chksum}" == "${fileCsum}" ]]; then
+		echo " OK (${chksum})"
+	else
+		echo " MISMATCH"
+		echo "=> expected ..... ${fileCsum}"
+		echo "=> calculated ... ${chksum}"
+		K_ERR=1
+		fi
 fi
 
 popd >/dev/null 2>&1
@@ -293,7 +331,7 @@ fi
 if [[ -d "${src}/lib" && -d "${dst}/lib" && -d "${dst}/usr/lib" ]]; then
 	cp -av ${src}/lib/libgcc_s.*  ${dst}/lib
 	chmod 755 ${dst}/lib/libgcc_s.so.1
-	if [[ "${XBT_C_PLUS_PLUS}" = "yes" ]]; then
+	if [[ "${XBT_C_PLUS_PLUS}" == "yes" ]]; then
 		cp -av ${src}/lib/libstdc++.* ${dst}/usr/lib
 		cp -av ${src}/lib/libsupc++.* ${dst}/usr/lib
 	fi
@@ -303,6 +341,13 @@ else
 	echo "***** ${_msg}"
 	echo "E> ${_msg}" >&${CONSOLE_FD}
 	unset _msg
+fi
+
+# Clean the target includes
+#
+if [[ -d "${src}/usr/include" ]]; then
+	find "${dst}/usr/include" -name "\.\.install\.cmd" -exec rm {} \;
+	find "${dst}/usr/include" -name "\.install"        -exec rm {} \;
 fi
 
 # Cleanup source and destination directory paths variables.
@@ -418,13 +463,13 @@ exit 1
 
 xbt_print_dots_35() {
 
-set +e # # Let the while loop fail without exiting this script.
+set +e ; # Let the while loop fail without exiting this script.
 i=$((35 - $1))
 while [[ ${i} -gt 0 ]]; do
 	echo -n "."
 	i=$((${i} - 1))
 done
-set -e # # All done with while loop.
+set -e ; # All done with while loop; fail enabled.
 
 }
 
@@ -460,18 +505,20 @@ if [[ $# -gt 1 ]]; then
 	chmod 644 "$2/${zname}"
 fi
 
-set +e # # Let tar fail without exiting this script.
+set +e ; # Let tar fail without exiting this script.
 tar -xf "${zname}"
 if [[ $? -ne 0 ]]; then
 	bunzip2 "${zname}" || gunzip "${zname}"
 	tar -xf "${tname}"
 fi
-set -e # # All done with tar.
+set -e ; # All done with tar.
 
 if [[ ! -d ${1} ]]; then
 	echo "Cannot unzip ${zname}"
 	xbt_bail "Cannot unzip ${zname}"
 fi
+
+_name="${zname}"
 
 rm -f "${zname}"
 rm -f "${tname}"
@@ -551,8 +598,8 @@ unset _TB
 unset _NL
 unset _SP
 
-set -o errexit # # Exit immediately if a command exits with a non-zero status.
-set -o nounset # # Treat unset variables as an error when substituting.
+set -o errexit ; # Exit immediately if a command exits with a non-zero status.
+set -o nounset ; # Treat unset variables as an error when substituting.
 
 umask 022
 
@@ -614,8 +661,8 @@ unset GCC
 # Getting: XBT_LIBC    XBT_LIBC_MD5SUM    XBT_LIBC_URL
 # Getting: XBT_LIBC_P  XBT_LIBC_P_MD5SUM  XBT_LIBC_P_URL
 #
-[[ "${LIBC:0:5}" = "glibc"  ]] && XBT_LIB="glibc"  || true
-[[ "${LIBC:0:6}" = "uClibc" ]] && XBT_LIB="uClibc" || true
+[[ "${LIBC:0:5}" == "glibc"  ]] && XBT_LIB="glibc"  || true
+[[ "${LIBC:0:6}" == "uClibc" ]] && XBT_LIB="uClibc" || true
 source ${XBT_SCRIPT_DIR}/${XBT_LIB}/${XBT_LIB}-methods.sh
 xbt_resolve_libc_name ${LIBC}
 unset LIBC
@@ -647,20 +694,20 @@ unset CFLAGS
 #     2) THREAD_MODEL
 
 XBT_C_PLUS_PLUS="no"
-[[ "${C_PLUS_PLUS}" = "yes" ]] && XBT_C_PLUS_PLUS="yes" || true
-[[ "${C_PLUS_PLUS}" = "y"   ]] && XBT_C_PLUS_PLUS="yes" || true
+[[ "${C_PLUS_PLUS}" == "yes" ]] && XBT_C_PLUS_PLUS="yes" || true
+[[ "${C_PLUS_PLUS}" == "y"   ]] && XBT_C_PLUS_PLUS="yes" || true
 unset C_PLUS_PLUS
 
 XBT_THREAD_MODEL="none"
-[[ "${THREAD_MODEL}" = "nptl" ]] && XBT_THREAD_MODEL="nptl" || true
+[[ "${THREAD_MODEL}" == "nptl" ]] && XBT_THREAD_MODEL="nptl" || true
 unset THREAD_MODEL
 
 # XBT_LIBC_P may be set because GLIBC Ports is available, but it is not needed
 # for all architectures.
 #
-[[ "${XBT_LINUX_ARCH}" = "powerpc" ]] && XBT_LIBC_P="" || true
-[[ "${XBT_LINUX_ARCH}" = "i386"    ]] && XBT_LIBC_P="" || true
-[[ "${XBT_LINUX_ARCH}" = "x86_64"  ]] && XBT_LIBC_P="" || true
+[[ "${XBT_LINUX_ARCH}" == "powerpc" ]] && XBT_LIBC_P="" || true
+[[ "${XBT_LINUX_ARCH}" == "i386"    ]] && XBT_LIBC_P="" || true
+[[ "${XBT_LINUX_ARCH}" == "x86_64"  ]] && XBT_LIBC_P="" || true
 
 # Report on what we think we are doing.
 #
@@ -696,9 +743,9 @@ unset _libc_p
 # the top-level cross-tools directory.  The resulting directory path is where
 # the new directory for the cross-development tool chain is or was created.
 
-if [[ x"${A_ARG1}" = x"clean" ]]; then
+if [[ x"${A_ARG1}" == x"clean" ]]; then
 	read -p "Remove ${XBT_TARGET} cross-tool chain. (y|n) [n]>"
-	if [[ x"${REPLY:0:1}" = x"y" ]]; then
+	if [[ x"${REPLY:0:1}" == x"y" ]]; then
 		echo -n "Removing ... "
 		rm -rf "${XBT_DIR}/${CROSS_TOOL_DIR}/${XBT_TARGET}"
 		echo "done"
@@ -778,7 +825,7 @@ if [[ ${K_ERR} -eq 1 ]]; then
 	exit 1
 fi
 
-if [[ x"${A_ARG1}" = x"download" ]]; then
+if [[ x"${A_ARG1}" == x"download" ]]; then
 	echo ""
 	exit 0
 fi
@@ -839,6 +886,7 @@ export PATH=${XBT_BINLINK_DIR}:/bin:/usr/bin:/sbin:/usr/sbin
 # cross-development tool chain directory is set in the XBT_TARGET_DIR variable.
 
 XBT_TARGET_DIR="${XBT_DIR}/${CROSS_TOOL_DIR}/${XBT_TOOL_DIR}"
+unset CROSS_TOOL_DIR # All done with this variable.
 
 # Scrub any <dir>/.. from the XBT_TARGET_DIR path:
 _pathParts=(${XBT_TARGET_DIR//\// })
@@ -859,22 +907,13 @@ unset _i
 unset _j
 unset _l
 
+XBT_XSRC_DIR="${XBT_TARGET_DIR}/_pkg-src"
+XBT_TARGET_MANIFEST="${XBT_TARGET_DIR}/_pkg-src/_manifest.txt"
+XBT_TOOLCHAIN_MANIFEST="${XBT_TARGET_DIR}/_manifest.txt"
 XBT_XHOST_DIR="${XBT_TARGET_DIR}/host"
 XBT_XTARG_DIR="${XBT_TARGET_DIR}/target"
-XBT_XSRC_DIR="${XBT_TARGET_DIR}/_pkg-src"
-XBT_TOOLCHAIN_MANIFEST="${XBT_TARGET_DIR}/manifest.txt"
-XBT_TARGET_MANIFEST="${XBT_TARGET_DIR}/_pkg-src/manifest.txt"
-unset CROSS_TOOL_DIR
 
-if [[ x"${A_ARG1}" = x"clean" ]]; then
-	echo ""
-	echo "Removing ${XBT_TOOL_DIR} cross-tool chain."
-	rm -rf "${XBT_TARGET_DIR}"
-	echo ""
-	exit 0
-fi
-
-if [[ -d "${XBT_TARGET_DIR}" ]]; then
+if [[ -d "${XBT_TARGET_DIR}" && x"${A_ARG1}" != x"continue" ]]; then
         echo ""
         echo "E> The ${XBT_TOOL_DIR} cross-tool directory already exists."
         echo "=> \${XBT_DIR}/\${CROSS_TOOL_DIR}/${XBT_TOOL_DIR}"
@@ -887,33 +926,79 @@ fi
 # All OK, so begin assaulting the file system with a new cross-development tool
 # chain directory and begin building it.
 
-mkdir -p "${XBT_TARGET_DIR}"
-mkdir -p "${XBT_XHOST_DIR}"
-mkdir -p "${XBT_XTARG_DIR}"
-mkdir -p "${XBT_XSRC_DIR}"
->"${XBT_TOOLCHAIN_MANIFEST}"
->"${XBT_TARGET_MANIFEST}"
+if [[ ! -d "${XBT_TARGET_DIR}" || x"${A_ARG1}" != x"continue" ]]; then
+	#
+	mkdir -p "${XBT_TARGET_DIR}"
+	mkdir -p "${XBT_XSRC_DIR}"
+	mkdir -p "${XBT_XHOST_DIR}"
+	mkdir -p "${XBT_XTARG_DIR}"
+	>"${XBT_TARGET_MANIFEST}"
+	>"${XBT_TOOLCHAIN_MANIFEST}"
+	#
+	mkdir -p "${XBT_XHOST_DIR}/usr/lib"
+	mkdir -p "${XBT_XHOST_DIR}/usr/${XBT_TARGET}/lib"
+	ln -sf lib "${XBT_XHOST_DIR}/usr/lib32"
+	ln -sf lib "${XBT_XHOST_DIR}/usr/lib64"
+	ln -sf lib "${XBT_XHOST_DIR}/usr/${XBT_TARGET}/lib32"
+	ln -sf lib "${XBT_XHOST_DIR}/usr/${XBT_TARGET}/lib64"
+	#
+	rm --force "${XBT_TARGET_DIR}"/.done.*
+fi
 
 echo ""
+
+t1=${SECONDS}
+
 exec 4>&1    # Save stdout at fd 4.
 CONSOLE_FD=4 #
 
-t1=${SECONDS}
+set +e ; # Let a build step fail without exiting this script.
 
 # Use a subshell so the current working directory can be changed and shell
 # variables can be assaulted without affecting this script.
 (
 cd ${XBT_BUILD_DIR}
-xbt_build_kernel_headers >${XBT_TARGET_DIR}/_log.0.kernel_headers 2>&1
-xbt_build_binutils       >${XBT_TARGET_DIR}/_log.1.binutils       2>&1
-xbt_build_gcc_libs       >${XBT_TARGET_DIR}/_log.2.gcc_libs       2>&1
-xbt_build_gcc_stage1     >${XBT_TARGET_DIR}/_log.3.gcc_stage1     2>&1
-xbt_build_libc_stage1    >${XBT_TARGET_DIR}/_log.4.libc_stage1    2>&1
-xbt_build_gcc_stage2     >${XBT_TARGET_DIR}/_log.5.gcc_stage2     2>&1
-xbt_build_libc_stage2    >${XBT_TARGET_DIR}/_log.6.libc_stage2    2>&1
-xbt_build_gcc_stage3     >${XBT_TARGET_DIR}/_log.7.gcc_stage3     2>&1
-xbt_build_libc_stage3    >${XBT_TARGET_DIR}/_log.8.libc_stage3    2>&1
-xbt_target_adjust        >${XBT_TARGET_DIR}/_log.9.target_adjust  2>&1
+rm --force --recursive *
+if [[ ! -f "${XBT_TARGET_DIR}/.done.kernel_headers" ]]; then
+	xbt_build_kernel_headers >${XBT_TARGET_DIR}/_log.0.kernel_headers 2>&1
+	touch "${XBT_TARGET_DIR}/.done.kernel_headers"
+fi
+if [[ ! -f "${XBT_TARGET_DIR}/.done.binutils" ]]; then
+	xbt_build_binutils       >${XBT_TARGET_DIR}/_log.1.binutils       2>&1
+	touch "${XBT_TARGET_DIR}/.done.binutils"
+fi
+if [[ ! -f "${XBT_TARGET_DIR}/.done.gcc_libs" ]]; then
+	xbt_build_gcc_libs       >${XBT_TARGET_DIR}/_log.2.gcc_libs       2>&1
+	touch "${XBT_TARGET_DIR}/.done.gcc_libs"
+fi
+if [[ ! -f "${XBT_TARGET_DIR}/.done.gcc_stage1" ]]; then
+	xbt_build_gcc_stage1     >${XBT_TARGET_DIR}/_log.3.gcc_stage1     2>&1
+	touch "${XBT_TARGET_DIR}/.done.gcc_stage1"
+fi
+if [[ ! -f "${XBT_TARGET_DIR}/.done.libc_stage1" ]]; then
+	xbt_build_libc_stage1    >${XBT_TARGET_DIR}/_log.4.libc_stage1    2>&1
+	touch "${XBT_TARGET_DIR}/.done.libc_stage1"
+fi
+if [[ ! -f "${XBT_TARGET_DIR}/.done.gcc_stage2" ]]; then
+	xbt_build_gcc_stage2     >${XBT_TARGET_DIR}/_log.5.gcc_stage2     2>&1
+	touch "${XBT_TARGET_DIR}/.done.gcc_stage2"
+fi
+if [[ ! -f "${XBT_TARGET_DIR}/.done.libc_stage2" ]]; then
+	xbt_build_libc_stage2    >${XBT_TARGET_DIR}/_log.6.libc_stage2    2>&1
+	touch "${XBT_TARGET_DIR}/.done.libc_stage2"
+fi
+if [[ ! -f "${XBT_TARGET_DIR}/.done.gcc_stage3" ]]; then
+	xbt_build_gcc_stage3     >${XBT_TARGET_DIR}/_log.7.gcc_stage3     2>&1
+	touch "${XBT_TARGET_DIR}/.done.gcc_stage3"
+fi
+if [[ ! -f "${XBT_TARGET_DIR}/.done.libc_stage3" ]]; then
+	xbt_build_libc_stage3    >${XBT_TARGET_DIR}/_log.8.libc_stage3    2>&1
+	touch "${XBT_TARGET_DIR}/.done.libc_stage3"
+fi
+if [[ ! -f "${XBT_TARGET_DIR}/.done.target_adjust" ]]; then
+	xbt_target_adjust        >${XBT_TARGET_DIR}/_log.9.target_adjust  2>&1
+	touch "${XBT_TARGET_DIR}/.done.target_adjust"
+fi
 )
 
 if [[ $? -ne 0 ]]; then
@@ -943,10 +1028,12 @@ if [[ $? -ne 0 ]]; then
 	exit 1
 fi
 
-t2=${SECONDS}
+set -e ; # All done with build steps; fail enabled.
 
 exec >&4     # Set fd 1 back to stdout.
 CONSOLE_FD=1 #
+
+t2=${SECONDS}
 
 rm -f "${XBT_TARGET_DIR}/_versions"
 echo "#!/bin/sh"                             >>${XBT_TARGET_DIR}/_versions
