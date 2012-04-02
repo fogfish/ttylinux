@@ -1,0 +1,17 @@
+	The target sysroot GMP, and probably CLOOG and PPL, include file
+	directory is used when compiling some of the healper programs that
+	run on the build host during the GCC build process.  This patch
+	avoids that problem for the GMP include path.
+	2012-3-29 douglas@ttylinux.org
+
+--- gcc-4.4.6/gcc/Makefile.in	2010-09-07 04:07:31.000000000 -0700
++++ gcc-4.4.6/gcc/Makefile.in	2012-03-29 20:42:33.846577988 -0700
+@@ -3348,7 +3348,7 @@
+ # How to compile object files to run on the build machine.
+
+ build/%.o :  # dependencies provided by explicit rule later
+-	$(CC_FOR_BUILD) -c $(BUILD_CFLAGS) $(BUILD_CPPFLAGS) -o $@ $<
++	$(CC_FOR_BUILD) -c $(BUILD_CFLAGS) $(filter-out $(GMPINC), $(BUILD_CPPFLAGS)) -o $@ $<
+
+ # Header dependencies for the programs that generate source code.
+ # These are library modules...

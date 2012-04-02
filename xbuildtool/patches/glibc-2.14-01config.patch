@@ -1,0 +1,20 @@
+The check for cpuid.h from Gcc fails because the check uses stdio.h, which
+comes from Glibc, which might not yet installed.
+
+To fix, add an #ifdef STDC_HEADER guard around the <stdio.h> include.
+
+diff -Naur glibc-2.14/sysdeps/i386/configure glibc-2.14/sysdeps/i386/configure
+--- glibc-2.14/sysdeps/i386/configure   2011-05-30 21:12:33.000000000 -0700
++++ glibc-2.14/sysdeps/i386/configure   2012-03-25 11:04:47.971221983 -0700
+@@ -99,7 +99,9 @@
+ 
+ # Factoring default headers for most tests.
+ ac_includes_default="\
+-#include <stdio.h>
++#ifdef HAVE_STDIO_H
++# include <stdio.h>
++#endif
+ #ifdef HAVE_SYS_TYPES_H
+ # include <sys/types.h>
+ #endif
+

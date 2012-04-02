@@ -1,0 +1,14 @@
+	The patch makes the target 64-bit GCC use /lib, not /lib64.
+	2012-3-29 douglas@ttylinux.org
+
+--- gcc-4.4.6/gcc/config/i386/linux64.h	2009-04-09 16:23:07.000000000 -0700
++++ gcc-4.4.6/gcc/config/i386/linux64.h	2012-03-29 20:46:37.737528932 -0700
+@@ -59,7 +59,7 @@
+    done.  */
+
+ #define GLIBC_DYNAMIC_LINKER32 "/lib/ld-linux.so.2"
+-#define GLIBC_DYNAMIC_LINKER64 "/lib64/ld-linux-x86-64.so.2"
++#define GLIBC_DYNAMIC_LINKER64 "/lib/ld-linux-x86-64.so.2"
+
+ #undef ASM_SPEC
+ #define ASM_SPEC "%{v:-V} %{Qy:} %{!Qn:-Qy} %{n} %{T} %{Ym,*} %{Yd,*} \

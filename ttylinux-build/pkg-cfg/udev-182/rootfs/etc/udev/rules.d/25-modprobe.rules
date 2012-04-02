@@ -1,0 +1,44 @@
+# vim: syntax=udevrules
+
+# /etc/udev/rules.d/25-modprobe.rules
+# (2007) for Bare Bones Linux by Douglas Jerome
+# (2009) adapted to minimalinux by Douglas Jerome
+# (2010) adapted to ttylinux by Douglas Jerome
+
+# *****************************************************************************
+# Rules that require modprobe.
+# *****************************************************************************
+
+ACTION!="add", GOTO="modprobe_rules_end"
+
+# All the rules herein include the match ACTION=="add"
+
+# Generic rule to allow loading modular drivers for existing hardware.
+#
+ENV{MODALIAS}=="?*", RUN+="/sbin/modprobe $env{MODALIAS}"
+
+# Rule for Intelligent Input/Output block device.
+# Rule for Multi Media Card flash memory block device.
+# Rule for pcmcia bus module so that 16-bit PCMCIA devices work.
+#
+SUBSYSTEM=="i2o",           RUN+="/sbin/modprobe i2o_block"
+SUBSYSTEM=="mmc",           RUN+="/sbin/modprobe mmc_block"
+SUBSYSTEM=="pcmcia_socket", RUN+="/sbin/modprobe pcmcia"
+
+# SCSI devices require different modules, dependent on their ATTRS{type}.
+# All of them require sg.
+#
+# module name  sysfs types
+# -----------  ---------
+# sd           0 TYPE_DISK, 7 TYPE_MOD, 14 TYPE_MOD
+# sr           4 TYPE_WORM, 5 TYPE_ROM
+# (os)st       1 TYPE_TAPE
+#
+SUBSYSTEM=="scsi_device", ATTRS{type}=="0|7|14", RUN+="/sbin/modprobe sd_mod"
+SUBSYSTEM=="scsi_device", ATTRS{type}=="[45]",   RUN+="/sbin/modprobe sr_mod"
+SUBSYSTEM=="scsi_device", ATTRS{type}=="1",      RUN+="/sbin/modprobe st"
+SUBSYSTEM=="scsi_device",                        RUN+="/sbin/modprobe sg"
+SUBSYSTEM=="scsi", ENV{DEVTYPE}=="scsi_device", TEST!="[module/sg]", RUN+="/sbin/modprobe sg"
+
+LABEL="modprobe_rules_end"
+

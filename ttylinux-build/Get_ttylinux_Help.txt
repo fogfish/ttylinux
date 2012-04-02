@@ -1,0 +1,17 @@
+========================
+How to Get ttylinux Help
+========================
+
+
+If you have some question(s) about using ttylinux, or some general ttylinux
+question, then:
+
+     FIRST - read the ttylinux User Guide at http://ttylinux.net/docs.html
+
+     then, if you still have a question(s) or want more information, email the
+     ttylinux mail list:  ttylinux@googlegroups.com
+                          http://groups.google.com/group/ttylinux/
+
+
+If you have an idea for ttylinux, then read the "How_To_Help_ttylinux.txt" file.
+

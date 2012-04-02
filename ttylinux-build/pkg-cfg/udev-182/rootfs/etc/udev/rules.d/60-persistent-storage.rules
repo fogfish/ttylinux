@@ -1,0 +1,61 @@
+# vim: syntax=udevrules
+
+# /etc/udev/rules.d/60-persistent-storage.rules
+# (2009) adapted to minimalinux by Douglas Jerome
+# (2010) adapted to ttylinux by Douglas Jerome
+
+# This scheme is based on:
+#      "Linux persistent device names", 2004, Hannes Reinecke <hare@suse.de>
+#
+# Persistent storage links for:
+#      /dev/disk/by-id
+#      /dev/disk/by-uuid
+#      /dev/disk/by-label
+#      /dev/disk/by-path
+#      /dev/disk/by-name
+
+# *****************************************************************************
+# Persistent Storage
+# *****************************************************************************
+
+# Skip these rules for under particular circumstances including inappropriate
+# block devices.
+#
+ACTION!="add",         GOTO="persistent_storage_end"
+SUBSYSTEM!="block",    GOTO="persistent_storage_end"
+KERNEL!="sd*|sg*|sr*", GOTO="persistent_storage_end"
+
+# Import the sysfs parent information for disk partitions.
+#
+KERNEL=="sd[a-z][0-9]", IMPORT{parent}=="ID_*"
+KERNEL=="sr[a-z][0-9]", IMPORT{parent}=="ID_*"
+
+# Create node by-id (hardware serial number).
+#
+KERNEL=="hd*[!0-9]", IMPORT{program}="ata_id --export $tempnode"
+KERNEL=="hd*[!0-9]", ENV{ID_SERIAL}=="?*", SYMLINK+="disk/by-id/ata-$env{ID_MODEL}_$env{ID_SERIAL}"
+KERNEL=="hd*[0-9]",  ENV{ID_SERIAL}=="?*", SYMLINK+="disk/by-id/ata-$env{ID_MODEL}_$env{ID_SERIAL}-part%n"
+KERNEL=="sd*[!0-9]|sr*", ENV{ID_SERIAL}!="?*", SUBSYSTEMS=="usb", IMPORT{program}="usb_id --export %p"
+KERNEL=="sd*[!0-9]|sr*", ENV{ID_SERIAL}!="?*", IMPORT{program}="scsi_id --export --whitelisted -d $tempnode", ENV{ID_BUS}="scsi"
+KERNEL=="sd*|sr*", ENV{DEVTYPE}=="disk",      ENV{ID_SERIAL}=="?*", SYMLINK+="disk/by-id/$env{ID_BUS}-$env{ID_SERIAL}"
+KERNEL=="sd*",     ENV{DEVTYPE}=="partition", ENV{ID_SERIAL}=="?*", SYMLINK+="disk/by-id/$env{ID_BUS}-$env{ID_SERIAL}-part%n"
+
+# Create node by by-path (shortest physical path).
+#
+KERNEL=="*[!0-9]|sr*", IMPORT{program}="path_id %p", SYMLINK+="disk/by-path/$env{ID_PATH}"
+KERNEL=="sr*", GOTO="persistent_storage_end"
+KERNEL=="*[0-9]", ENV{ID_PATH}=="?*", SYMLINK+="disk/by-path/$env{ID_PATH}-part%n"
+
+# Create node by by-label/by-uuid (filesystem properties).
+#
+KERNEL=="*[!0-9]", ATTR{removable}=="1", GOTO="persistent_storage_end"
+ENV{ID_FS_USAGE}=="filesystem|other|crypto", ENV{ID_FS_UUID_ENC}=="?*",  SYMLINK+="disk/by-uuid/$env{ID_FS_UUID_ENC}"
+ENV{ID_FS_USAGE}=="filesystem|other",        ENV{ID_FS_LABEL_ENC}=="?*", SYMLINK+="disk/by-label/$env{ID_FS_LABEL_ENC}"
+
+# BIOS Enhanced Disk Device
+#
+KERNEL=="*[!0-9]", IMPORT{program}="edd_id --export $tempnode"
+KERNEL=="*[!0-9]", ENV{ID_EDD}=="?*", SYMLINK+="disk/by-id/edd-$env{ID_EDD}"
+KERNEL=="*[0-9]",  ENV{ID_EDD}=="?*", SYMLINK+="disk/by-id/edd-$env{ID_EDD}-part%n"
+
+LABEL="persistent_storage_end"
