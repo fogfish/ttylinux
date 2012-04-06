@@ -1,6 +1,6 @@
 # vim: syntax=conf
 etc/udev/rules.d/
-etc/udev/rules.d/10-ttylinux.rules
+# etc/udev/rules.d/10-ttylinux.rules
 # etc/udev/rules.d/25-modprobe.rules
 # etc/udev/rules.d/27-firmware.rules
 # etc/udev/rules.d/50-ttylinux.rules
