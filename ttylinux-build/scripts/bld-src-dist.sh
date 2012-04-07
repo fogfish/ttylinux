@@ -29,6 +29,7 @@
 #
 # CHANGE LOG
 #
+#	07apr12	drj	Added the .html manifest file.
 #	18feb12	drj	File creation.
 #
 # *****************************************************************************
@@ -102,7 +103,7 @@ for p in ${TTYLINUX_PACKAGE[@]}; do
 	t1=${SECONDS}
 
 	echo -n "${p} ";
-	for ((i=(24-${#p}) ; i > 0 ; i--)); do echo -n "."; done
+	for ((i=(27-${#p}) ; i > 0 ; i--)); do echo -n "."; done
 
 	set +o errexit
 	srcPkgFile=$(ls "${TTYLINUX_PKGSRC_DIR}/${p}.t"* 2>/dev/null)
@@ -138,7 +139,7 @@ for p in ${TTYLINUX_PACKAGE[@]}; do
 		echo -n "- [no patches] "
 	fi
 
-	echo -n "... DONE ["
+	echo -n " DONE ["
 	t2=${SECONDS}
 	mins=$(((${t2}-${t1})/60))
 	secs=$(((${t2}-${t1})%60))
@@ -221,21 +222,24 @@ echo "DONE"
 # Make an HTML package list.
 # *****************************************************************************
 
+# Make an .html manifest of the external source packages, avoiding the patches
+# that are kept in the ttylinux build system.
+
 pkglist_html_make() {
 
+local _fname="/tmp/$(basename ${manifest})"
+
+rm --force ${_fname}
+sort ${manifest} >${_fname}
 while read name stuff; do
 	[[ "${name}" == "=>" ]] && continue || true
-#	&#187;
-#	<a style="color:#07F"
-#	href="ftp://ftp.alsa-project.org/pub/lib/">
-#	alsa-lib-1.0.25</a><br/>
-	echo -n "&#187; "
-	echo -n "<a style=\"color:#07F\" "
-	echo -n "href=\"pkg-src/${name}\"> "
-	echo -n "${name}</a><br/>"
-	echo ""
-
-done <${manifest}
+	echo -n "&#187; "                    >>${htmlfile}
+	echo -n "<a style=\"color:#07F\" "   >>${htmlfile}
+	echo -n "href=\"pkg-src/${name}\"> " >>${htmlfile}
+	echo -n "${name}</a><br/>"           >>${htmlfile}
+	echo ""                              >>${htmlfile}
+done <${_fname}
+rm --force ${_fname}
 
 }
 
@@ -273,11 +277,13 @@ echo "##### START getting source packages"
 echo ""
 
 manifest="${TTYLINUX_BUILD_DIR}/sources/_manifest.txt"
+htmlfile="${TTYLINUX_BUILD_DIR}/sources/_manifest.html"
 
 echo -n "i> Recreating source package staging directory ....... "
 rm --force --recursive "${TTYLINUX_BUILD_DIR}/sources"
 mkdir --mode=755 "${TTYLINUX_BUILD_DIR}/sources"
 >"${manifest}"
+>"${htmlfile}"
 echo "DONE"
 echo ""
 

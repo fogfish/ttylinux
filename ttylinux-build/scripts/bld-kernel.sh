@@ -411,7 +411,7 @@ fi
 echo ""
 echo "##### START cross-building the kernel"
 echo "g - getting the source and configuration packages"
-echo "b - building and installing the package into build-root"
+echo "b - building and installing the package into build directory"
 echo "f - finding installed files"
 echo "m - looking for man pages to compress"
 echo "p - creating installable package"

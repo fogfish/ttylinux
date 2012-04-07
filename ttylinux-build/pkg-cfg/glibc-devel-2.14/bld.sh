@@ -69,7 +69,7 @@ rm --force "${fileList}"
 find "${TTYLINUX_SYSROOT_DIR}/usr/include" -type f | sort >"${fileList}"
 sed --expression="s#${TTYLINUX_SYSROOT_DIR}/##" --in-place "${fileList}"
 cat "${dir}/files.common" >>"${fileList}"
-chmod 777 "${fileList}"
+chmod 666 "${fileList}"
 
 return 0
 

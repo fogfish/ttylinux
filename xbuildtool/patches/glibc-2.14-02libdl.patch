@@ -1,0 +1,102 @@
+
+     This patch is nicked from somewhere I don't remember (Archlinux?).  It
+     reverts to some glibc-2.13 behavior for closing shared libs to avoid an
+     ALSA problem.
+
+     Douglas Jerome <douglas@ttylinux.org>
+
+diff -Naur glibc-2.14/elf/dl-close.c glibc-2.14/elf/dl-close.c
+--- glibc-2.14/elf/dl-close.c	2011-05-30 21:12:33.000000000 -0700
++++ glibc-2.14/elf/dl-close.c	2012-04-06 18:33:03.018335054 -0700
+@@ -119,17 +119,8 @@
+   if (map->l_direct_opencount > 0 || map->l_type != lt_loaded
+       || dl_close_state != not_pending)
+     {
+-      if (map->l_direct_opencount == 0)
+-	{
+-	  if (map->l_type == lt_loaded)
+-	    dl_close_state = rerun;
+-	  else if (map->l_type == lt_library)
+-	    {
+-	      struct link_map **oldp = map->l_initfini;
+-	      map->l_initfini = map->l_orig_initfini;
+-	      _dl_scope_free (oldp);
+-	    }
+-	}
++      if (map->l_direct_opencount == 0 && map->l_type == lt_loaded)
++        dl_close_state = rerun;
+ 
+       /* There are still references to this object.  Do nothing more.  */
+       if (__builtin_expect (GLRO(dl_debug_mask) & DL_DEBUG_FILES, 0))
+diff -Naur glibc-2.14/elf/dl-deps.c glibc-2.14/elf/dl-deps.c
+--- glibc-2.14/elf/dl-deps.c	2011-05-30 21:12:33.000000000 -0700
++++ glibc-2.14/elf/dl-deps.c	2012-04-06 18:38:30.364242666 -0700
+@@ -478,6 +478,7 @@
+ 		  nneeded * sizeof needed[0]);
+ 	  atomic_write_barrier ();
+ 	  l->l_initfini = l_initfini;
++	  l->l_free_initfini = 1;
+ 	}
+ 
+       /* If we have no auxiliary objects just go on to the next map.  */
+@@ -681,6 +682,7 @@
+   l_initfini[nlist] = NULL;
+   atomic_write_barrier ();
+   map->l_initfini = l_initfini;
++  map->l_free_initfini = 1;
+   if (l_reldeps != NULL)
+     {
+       atomic_write_barrier ();
+@@ -689,5 +691,5 @@
+       _dl_scope_free (old_l_reldeps);
+     }
+   if (old_l_initfini != NULL)
+-      map->l_orig_initfini = old_l_initfini;
++      _dl_scope_free (old_l_initfini);
+ }
+diff -Naur glibc-2.14/elf/dl-libc.c glibc-2.14/elf/dl-libc.c
+--- glibc-2.14/elf/dl-libc.c	2011-05-30 21:12:33.000000000 -0700
++++ glibc-2.14/elf/dl-libc.c	2012-04-06 18:41:54.196694411 -0700
+@@ -279,6 +279,8 @@
+ 	      if (! old->dont_free)
+ 		free (old);
+ 	    }
++	  if (l->l_free_initfini)
++	    free (l->l_initfini);
+ 	}
+ 
+       if (__builtin_expect (GL(dl_ns)[ns]._ns_global_scope_alloc, 0) != 0
+diff -Naur glibc-2.14/elf/rtld.c glibc-2.14/elf/rtld.c
+--- glibc-2.14/elf/rtld.c	2011-05-30 21:12:33.000000000 -0700
++++ glibc-2.14/elf/rtld.c	2012-04-06 18:43:39.938372457 -0700
+@@ -2263,6 +2263,7 @@
+ 	      lnp->dont_free = 1;
+ 	      lnp = lnp->next;
+ 	    }
++          l->l_free_initfini = 0;
+ 
+ 	  if (l != &GL(dl_rtld_map))
+ 	    _dl_relocate_object (l, l->l_scope, GLRO(dl_lazy) ? RTLD_LAZY : 0,
+diff -Naur glibc-2.14/include/link.h glibc-2.14/include/link.h
+--- glibc-2.14/include/link.h	2011-05-30 21:12:33.000000000 -0700
++++ glibc-2.14/include/link.h	2012-04-06 18:46:32.801211375 -0700
+@@ -192,6 +192,9 @@
+ 						 during LD_TRACE_PRELINKING=1
+ 						 contains any DT_SYMBOLIC
+ 						 libraries.  */
++    unsigned int l_free_initfini:1; /* Nonzero if l_initfini can be
++				       freed, ie. not allocated with
++				       the dummy malloc in ld.so.  */
+ 
+     /* Collected information about own RPATH directories.  */
+     struct r_search_path_struct l_rpath_dirs;
+@@ -240,9 +243,6 @@
+ 
+     /* List of object in order of the init and fini calls.  */
+     struct link_map **l_initfini;
+-    /* The init and fini list generated at startup, saved when the
+-       object is also loaded dynamically.  */
+-    struct link_map **l_orig_initfini;
+ 
+     /* List of the dependencies introduced through symbol binding.  */
+     struct link_map_reldeps

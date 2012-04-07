@@ -413,7 +413,7 @@ local fileList=""
 # Make the binary package: make a tarball of the files that is specified in the
 # package configuration; this is found in "${TTYLINUX_PKGCFG_DIR}/$1/files".
 
-# Save the list of files actually installed into build-root/
+# Save the list of files actually installed into sysroot/
 #
 cp --force FILES "${TTYLINUX_SYSROOT_DIR}/usr/share/ttylinux/pkg-$1-FILES"
 rm --force FILES # All done with the FILES file.
@@ -510,7 +510,7 @@ fi
 echo ""
 echo "##### START cross-building packages"
 echo "g - getting the source and configuration packages"
-echo "b - building and installing the package into build-root"
+echo "b - building and installing the package into sysroot"
 echo "f - finding installed files"
 echo "m - looking for man pages to compress"
 echo "p - creating ttylinux-installable package"

@@ -55,5 +55,5 @@ _GCC[1]="gcc-4.6.2"
 _GCC_MD5SUM[0]="ab525d429ee4425050a554bc9247d6c4"
 _GCC_MD5SUM[1]="028115c4fbfb6cfd75d6369f4a90d87e"
 
-_GCC_URL[0]="ftp://ftp.gnu.org/gnu/gcc/${_GCC[1]} http://ftp.gnu.org/gnu/gcc/${_GCC[1]} ftp://sourceware.org/pub/gcc/releases/${_GCC[1]}/"
+_GCC_URL[0]="ftp://ftp.gnu.org/gnu/gcc/${_GCC[0]} http://ftp.gnu.org/gnu/gcc/${_GCC[0]} ftp://sourceware.org/pub/gcc/releases/${_GCC[0]}/"
 _GCC_URL[1]="ftp://ftp.gnu.org/gnu/gcc/${_GCC[1]} http://ftp.gnu.org/gnu/gcc/${_GCC[1]} ftp://sourceware.org/pub/gcc/releases/${_GCC[1]}/"

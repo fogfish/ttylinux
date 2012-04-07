@@ -1,31 +1,16 @@
-export the rpc symbols and headers again until we can get libtirpc sorted
-out as a proper and full replacement
 
-patch from fedora (if redhat can't get it to work as the maintainers of all
-these packages, then what chance do we have!)
+     This patch exports the RPC symbols and headers, as the previous glibc
+     version do.  When libtirpc works as a proper and full replacement for RPC,
+     then use libtirpc.
 
---- glibc-2.14/NEWS
-+++ glibc-2.14/NEWS
-@@ -42,16 +42,6 @@ Version 2.14
-   12724, 12734, 12738, 12746, 12766, 12775, 12777, 12782, 12788, 12792,
-   12795, 12811, 12813, 12814, 12841
- 
--* The RPC implementation in libc is obsoleted.  Old programs keep working
--  but new programs cannot be linked with the routines in libc anymore.
--  Programs in need of RPC functionality must be linked against TI-RPC.
--  The TI-RPC implementation is IPv6 enabled and there are other benefits.
--
--  Visible changes of this change include (obviously) the inability to link
--  programs using RPC functions without referencing the TI-RPC library and the
--  removal of the RPC headers from the glibc headers.
--  Implemented by Ulrich Drepper.
--
- * New Linux interfaces: clock_adjtime, name_to_handle_at, open_by_handle_at,
-   syncfs, setns, sendmmsg
- 
---- glibc-2.14/include/libc-symbols.h
-+++ glibc-2.14/include/libc-symbols.h
-@@ -635,7 +635,7 @@ for linking")
+     This is shamelessly nicked from LFS which seems to have taken from Fedora.
+
+     Douglas Jerome <douglas@ttylinux.org>
+
+diff -Naur glibc-2.14/include/libc-symbols.h glibc-2.14/include/libc-symbols.h
+--- glibc-2.14/include/libc-symbols.h	2011-05-30 21:12:33.000000000 -0700
++++ glibc-2.14/include/libc-symbols.h	2012-04-06 21:30:48.261001171 -0700
+@@ -635,7 +635,7 @@
  # define libc_hidden_proto(name, attrs...) hidden_proto (name, ##attrs)
  # define libc_hidden_def(name) hidden_def (name)
  # define libc_hidden_weak(name) hidden_weak (name)
@@ -34,9 +19,10 @@ these packages, then what chance do we have!)
  # define libc_hidden_ver(local, name) hidden_ver (local, name)
  # define libc_hidden_data_def(name) hidden_data_def (name)
  # define libc_hidden_data_weak(name) hidden_data_weak (name)
---- glibc-2.14/nis/Makefile
-+++ glibc-2.14/nis/Makefile
-@@ -23,9 +23,9 @@ subdir	:= nis
+diff -Naur glibc-2.14/nis/Makefile glibc-2.14/nis/Makefile
+--- glibc-2.14/nis/Makefile	2011-05-30 21:12:33.000000000 -0700
++++ glibc-2.14/nis/Makefile	2012-04-06 21:32:27.353762342 -0700
+@@ -23,9 +23,9 @@
  
  aux			:= nis_hash
  
@@ -48,9 +34,10 @@ these packages, then what chance do we have!)
  
  # These are the databases available for the nis (and perhaps later nisplus)
  # service.  This must be a superset of the services in nss.
---- glibc-2.14/sunrpc/Makefile
-+++ glibc-2.14/sunrpc/Makefile
-@@ -53,7 +53,7 @@ headers-in-tirpc = $(addprefix rpc/,auth.h auth_unix.h clnt.h pmap_clnt.h \
+diff -Naur glibc-2.14/sunrpc/Makefile glibc-2.14/sunrpc/Makefile
+--- glibc-2.14/sunrpc/Makefile	2011-05-30 21:12:33.000000000 -0700
++++ glibc-2.14/sunrpc/Makefile	2012-04-06 21:37:58.105627375 -0700
+@@ -53,7 +53,7 @@
  				    des_crypt.h)
  headers-not-in-tirpc = $(addprefix rpc/,key_prot.h rpc_des.h) \
  		       $(rpcsvc:%=rpcsvc/%) rpcsvc/bootparam.h

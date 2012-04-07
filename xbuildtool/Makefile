@@ -98,9 +98,9 @@ help:
 	@echo ""
 	@echo "Variables:"
 	@echo ""
-	@echo "export XBT_STEP=yes .... This will enable stepping through the"
-	@echo "                         build steps.  Respond at the prompt"
-	@echo "                         with \"g\" to stop stepping."
+	@echo "export XBT_STEP=yes .... This will enable stepping through"
+	@echo "                         the build steps.  Respond at the"
+	@echo "                         prompt with \"g\" to stop stepping."
 	@echo ""
 
 setup:
