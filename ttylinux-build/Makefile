@@ -61,7 +61,7 @@
 
 
 TTYLINUX_NAME    := hawberk
-TTYLINUX_VERSION := 10.1
+TTYLINUX_VERSION := 14.0
 
 
 # *************************************************************************** #

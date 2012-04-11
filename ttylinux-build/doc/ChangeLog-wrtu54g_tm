@@ -1,6 +1,12 @@
 Current  Maintainer: (2008-    ) Douglas Jerome <douglas@ttylinux.org>
 
 
+Version 14.0, Sun Apr  8 20:47:06 MST 2012
+ - skipped version numbers -- how wierd is that
+ - distribution named "hawberk"
+ - updated bash-4.2 patchlevel to 24
+ - updated from e2fsprogs-1.41.12 to e2fsprogs-1.42.1
+
 Version 10.0, Tue Feb 28 22:14:02 MST 2012
  - distribution named "bazooka"
  - updated from uClibc-0.9.31 to  uClibc-0.9.32

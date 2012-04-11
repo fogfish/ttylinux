@@ -1,8 +1,8 @@
 #!/bin/bash
 
-rootfs="$(pwd)/sysroot/"
-rootfs="$(pwd)/mnt/"
 rootfs="/mnt/loco"
+rootfs="$(pwd)/mnt/"
+rootfs="$(pwd)/sysroot/"
 
 # Remove mounts if something goes wrong.
 #

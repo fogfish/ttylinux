@@ -1,4 +1,4 @@
-% ttylinux pc_i486-10.0 User Guide
+% ttylinux pc_i486-14.0 User Guide
 % Copyright (C) 2008-2012 Douglas Jerome <douglas@ttylinux.org>
 %
 % This document is derived from the ttylinux 7.0 User Guide written
@@ -16,8 +16,7 @@
 
 % Use some packages
 %
-% Fedora Core 10: find packages in /usr/share/texmf/tex/latex/... Try a
-% command like:
+% Fedora: find packages in /usr/share/texmf/tex/latex/... Try a command like:
 % $ find /usr/share/texmf/tex/latex/ -name "url.*"
 %
 \usepackage[headings]{fullpage}
@@ -49,7 +48,7 @@
 \renewcommand\footrulewidth{0.4pt}
 \fancyfoot{}
 \fancyfoot[R]{\thepage}
-\fancyfoot[L]{ttylinux : pc\_i486 10.0}
+\fancyfoot[L]{ttylinux : pc\_i486 14.0}
 \footskip=48pt
 
 % Sans serif typeface is the default.
@@ -71,7 +70,7 @@
 \lstset{basicstyle=\ttfamily\small}
 
 \title{ttylinux User Guide}
-\author{pc\_i486 10.0\\ \\Maintained by Douglas Jerome\\Based on Previous Work by Pascal Schmidt}
+\author{pc\_i486 14.0\\ \\Maintained by Douglas Jerome\\Based on Previous Work by Pascal Schmidt}
 
 % *****************************************************************************
 % Title Page
@@ -199,16 +198,16 @@ General Public License; a copy of this license is included in the file
 \begin{tabular}{l|l|l}
 Package      & Version & License \\
 \hline
-bash         & 4.2    & GPL  \\
-busybox      & 1.19.3 & GPL  \\
-dropbear     & 0.53.1 & MIT  \\
-e2fsprogs    & 1.42   & GPL  \\
-glibc        & 2.9    & LGPL \\
-iptables     & 1.4.12 & GPL  \\
-lilo         & 23.2   & BSD  \\
-ncurses      & 5.7    & MIT  \\
-ppp          & 2.4.5  & GPL  \\
-retawq       & 0.2.6c & GPL  \\
+bash         & 4.2      & GPL  \\
+busybox      & 1.19.3   & GPL  \\
+dropbear     & 0.53.1   & MIT  \\
+e2fsprogs    & 1.42.1   & GPL  \\
+glibc        & 2.9      & LGPL \\
+iptables     & 1.4.12.2 & GPL  \\
+lilo         & 23.2     & BSD  \\
+ncurses      & 5.7      & MIT  \\
+ppp          & 2.4.5    & GPL  \\
+retawq       & 0.2.6c   & GPL  \\
 \end{tabular}
 \end{center}
 
@@ -257,9 +256,9 @@ ttylinux is available for several different CPUs and hardware architectures;
 currently, ttylinux operation on a PC compatible i486 architecture is described
 in this User Guide, with much applicability to the i686 and x86\_64 PC
 platforms. These systems are:\\
-{\tt ttylinux 10.0} - {\bf i486}, specifically the i486 instruction set\\
-{\tt ttylinux 10.0} - {\bf i686}, Pentium Pro instruction set\\
-{\tt ttylinux 10.0} - {\bf x86\_64}, AMD64/Intel 64 instruction set
+{\tt ttylinux 14.0} - {\bf i486}, specifically the i486 instruction set\\
+{\tt ttylinux 14.0} - {\bf i686}, Pentium Pro instruction set\\
+{\tt ttylinux 14.0} - {\bf x86\_64}, AMD64/Intel 64 instruction set
 
 {\bf CPUs and Computers}
 
@@ -445,10 +444,10 @@ ISO 9660 file system. The pc\_i486 CD-ROM has the following directory structure:
 |   |-- bash-4.2-i486.tbz
 |   |-- busybox-1.19.3-i486.tbz
 |   |-- dropbear-0.53.1-i486.tbz
-|   |-- e2fsprogs-1.42-i486.tbz
+|   |-- e2fsprogs-1.42.1-i486.tbz
 |   |-- glibc-2.9-i486.tbz
 |   |-- gpm-1.20.6-i486.tbz
-|   |-- iptables-1.4.12-i486.tbz
+|   |-- iptables-1.4.12.2-i486.tbz
 |   |-- lilo-23.2-i486.tbz
 |   |-- ncurses-5.7-i486.tbz
 |   |-- ppp-2.4.5-i486.tbz
@@ -549,15 +548,15 @@ mounted as type iso9660 e.g., mounted by the following command.
 
 {\bf Using a ttylinux CD-ROM ISO Image File}
 
-If you have a downloaded ttylinux CD-ROM image file, ttylinux-i486-10.0.iso.gz,
-ttylinux-i686-10.0.iso.gz or ttylinux-x86\_64-10.0.iso.gz, then you can mount
+If you have a downloaded ttylinux CD-ROM image file, ttylinux-i486-14.0.iso.gz,
+ttylinux-i686-14.0.iso.gz or ttylinux-x86\_64-14.0.iso.gz, then you can mount
 it via loopback device with the following commands; substitue i686 or x86\_64
 for i486 where appropriate.
 
 \begin{lstlisting}
 	mkdir -p mnt/cdrom
-	gunzip ttylinux-i486-10.0.iso.gz
-	mount -t iso9660 -o loop ttylinux-i486-10.0.iso mnt/cdrom
+	gunzip ttylinux-i486-14.0.iso.gz
+	mount -t iso9660 -o loop ttylinux-i486-14.0.iso mnt/cdrom
 \end{lstlisting}
 
 {\bf Critical ttylinux CD-ROM Files}
@@ -979,15 +978,15 @@ This description uses \url{LILO} for boot loading; other boot loaders such as
 
 There are two files to take from the ttylinux CD-ROM image, either by burning
 the image to a blank CD-ROM disc and mounting it, or mounting the CR-ROM image
-via loop device. In the following commands, the ttylinux version 10.0 CD-ROM
-image file is named \url{ttylinux-i486-10.0.iso.gz}; decompress it and mount it
+via loop device. In the following commands, the ttylinux version 14.0 CD-ROM
+image file is named \url{ttylinux-i486-14.0.iso.gz}; decompress it and mount it
 via loop device with the following commands, substituting your actual CPU
 \url{x86_64} or \url{i686}, if needed.
 
 \begin{lstlisting}
 	mkdir -p mnt/ttylinux
-	gunzip ttylinux-i486-10.0.iso.gz
-	mount -t iso9660 -o loop ttylinux-i486-10.0.iso mnt/ttylinux
+	gunzip ttylinux-i486-14.0.iso.gz
+	mount -t iso9660 -o loop ttylinux-i486-14.0.iso mnt/ttylinux
 \end{lstlisting}
 
 The two files needed from the CD-ROM are the ttylinux root file system,

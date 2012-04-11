@@ -1,6 +1,13 @@
 Current  Maintainer: (2008-    ) Douglas Jerome <douglas@ttylinux.org>
 Previous Maintainer: (2001-2008) Pascal Schmidt <ttylinux@ewetel.net>
 
+Version 14.0, Sun Apr  8 15:31:28 MST 2012
+ - skipped version numbers -- how wierd is that
+ - distribution named "hawberk"
+ - updated bash-4.2 patchlevel to 24
+ - updated from e2fsprogs-1.41.12 to e2fsprogs-1.42.1
+ - updated from iptables-1.4.9.1 to iptables-1.4.12.2
+
 Version 10.0, Tue Feb 28 22:14:02 MST 2012
  - distribution named "bazooka"
  - added grub2 loopback.cfg in ISO

@@ -59,6 +59,7 @@ PKG_STATUS="./configure error"
 [[ "${TTYLINUX_PLATFORM}" == "wrtu54g_tm" ]] && CONFIG_BLKID="--enable-libblkid"
 [[ "${TTYLINUX_PLATFORM}" == "wrtu54g_tm" ]] && CONFIG_DEFRAG="--disable-defrag"
 [[ "${TTYLINUX_PLATFORM}" == "pc_i486"    ]] && TTYLINUX_LDFLAGS=""
+[[ "${TTYLINUX_PLATFORM}" == "wrtu54g_tm" ]] && TTYLINUX_LDFLAGS=""
 
 cd "${PKG_NAME}-${PKG_VERSION}"
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_set"

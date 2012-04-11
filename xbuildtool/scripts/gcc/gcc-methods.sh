@@ -801,6 +801,21 @@ if [[ "${XBT_GCC}" = "gcc-4.6.2" ]]; then
 	CONFIGURE_WITHOUTS="--without-cloog --without-ppl"
 fi
 
+# Configure GCC for using only /lib and NOT /lib64 for x86_64.
+#
+cd "${XBT_GCC}"
+if [[ "${XBT_LINUX_ARCH}" = "x86_64" ]]; then
+	# Change GCC to use /lib for 64-bit stuff, not /lib64
+	sed -e 's|/lib64/ld-linux|/lib/ld-linux|' -i gcc/config/i386/linux64.h
+	sed -e 's| ../lib64 | ../lib |'           -i gcc/config/i386/t-linux64
+	# On x86_64, unsetting the multilib spec for GCC ensures that it won't
+	# attempt to link against libraries on the host.
+	for file in $(find gcc/config -name t-linux64) ; do
+		sed '/MULTILIB_OSDIRNAMES/d' -i ${file}
+	done
+fi
+cd ..
+
 # The GCC documentation recommends building GCC outside of the source directory
 # in a dedicated build directory.
 #

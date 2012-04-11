@@ -25,7 +25,7 @@
 # Definitions
 # ******************************************************************************
 
-PKG_URL="http://www.kernel.org/pub/linux/utils/util-linux/v2.21"
+PKG_URL="http://www.kernel.org/pub/linux/utils/util-linux/v2.21/"
 PKG_TAR="util-linux-2.21.tar.bz2"
 PKG_SUM=""
 

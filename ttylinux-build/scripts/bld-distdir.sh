@@ -271,7 +271,7 @@ echo -n "i> Copying documentation files to Boot CD ............ "
 _chgLog="ChangeLog-${TTYLINUX_PLATFORM}"
 cp ${TTYLINUX_DOC_DIR}/${_chgLog} cdrom/doc/
 if [[ -f ${TTYLINUX_DOC_DIR}/User_Guide.html ]]; then
-	cp ${TTYLINUX_DOC_DIR}/User_Guide.html sdcard/doc/
+	cp ${TTYLINUX_DOC_DIR}/User_Guide.html cdrom/doc/
 else
 	echo ""
 	echo -en "${TEXT_BYELLOW}"
@@ -279,7 +279,7 @@ else
 	echo -e  "${TEXT_NORM} no User_Guide.html"
 fi
 if [[ -f ${TTYLINUX_DOC_DIR}/User_Guide.pdf ]]; then
-	cp ${TTYLINUX_DOC_DIR}/User_Guide.pdf sdcard/doc/
+	cp ${TTYLINUX_DOC_DIR}/User_Guide.pdf cdrom/doc/
 else
 	echo -en "${TEXT_BYELLOW}"
 	echo -n  "WARNING"
@@ -406,7 +406,7 @@ _chgLog="ChangeLog-${TTYLINUX_PLATFORM}"
 cp ${TTYLINUX_DOC_DIR}/${_chgLog}           cdrom/doc/
 cp ${TTYLINUX_DOC_DIR}/Flash_Disk_Howto.txt cdrom/doc/
 if [[ -f ${TTYLINUX_DOC_DIR}/User_Guide.html ]]; then
-	cp ${TTYLINUX_DOC_DIR}/User_Guide.html sdcard/doc/
+	cp ${TTYLINUX_DOC_DIR}/User_Guide.html cdrom/doc/
 else
 	echo ""
 	echo -en "${TEXT_BYELLOW}"
@@ -414,7 +414,7 @@ else
 	echo -e  "${TEXT_NORM} no User_Guide.html"
 fi
 if [[ -f ${TTYLINUX_DOC_DIR}/User_Guide.pdf ]]; then
-	cp ${TTYLINUX_DOC_DIR}/User_Guide.pdf sdcard/doc/
+	cp ${TTYLINUX_DOC_DIR}/User_Guide.pdf cdrom/doc/
 else
 	echo -en "${TEXT_BYELLOW}"
 	echo -n  "WARNING"
@@ -618,7 +618,7 @@ echo -n "i> Copying documentation files ....................... "
 _chgLog="ChangeLog-${TTYLINUX_PLATFORM}"
 cp ${TTYLINUX_DOC_DIR}/${_chgLog} cdrom/doc/
 if [[ -f ${TTYLINUX_DOC_DIR}/User_Guide.html ]]; then
-	cp ${TTYLINUX_DOC_DIR}/User_Guide.html sdcard/doc/
+	cp ${TTYLINUX_DOC_DIR}/User_Guide.html cdrom/doc/
 else
 	echo ""
 	echo -en "${TEXT_BYELLOW}"
@@ -626,7 +626,7 @@ else
 	echo -e  "${TEXT_NORM} no User_Guide.html"
 fi
 if [[ -f ${TTYLINUX_DOC_DIR}/User_Guide.pdf ]]; then
-	cp ${TTYLINUX_DOC_DIR}/User_Guide.pdf sdcard/doc/
+	cp ${TTYLINUX_DOC_DIR}/User_Guide.pdf cdrom/doc/
 else
 	echo -en "${TEXT_BYELLOW}"
 	echo -n  "WARNING"

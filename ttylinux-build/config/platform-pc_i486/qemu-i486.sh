@@ -24,7 +24,7 @@ exit 1
 
 _path=""
 for p in ${PATH//:/ }; do
-	if [[ -x $p/qemu ]]; then _path=$p/qemu; fi
+	if [[ -x $p/qemu-system-i386 ]]; then _path=$p/qemu-system-i386; fi
 done
 if [[ x"${_path}" = x ]]; then
 	echo ""
@@ -98,9 +98,8 @@ for p in ${REPLY}; do
 	fi
 done
 
-qemu				\
-	-cpu 486		\
-	-m 28			\
+qemu-system-i386		\
+	-m 32			\
 	-net nic,model=rtl8139	\
 	${_serial}		\
 	-kernel $1/${_kernel}	\

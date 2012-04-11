@@ -1,6 +1,17 @@
 Current  Maintainer: (2008-    ) Douglas Jerome <douglas@ttylinux.org>
 Previous Maintainer: (2001-2008) Pascal Schmidt <ttylinux@ewetel.net>
 
+Version 14.0, Sun Apr  8 21:25:50 MST 2012
+ - skipped version numbers -- how wierd is that
+ - distribution named "hawberk"
+ - updated bash-4.2 patchlevel to 24
+ - updated from e2fsprogs-1.41.12 to e2fsprogs-1.42.1
+ - updated from iptables-1.4.9.1 to iptables-1.4.12.2
+ - updated from gcc-4.4.4 to gcc-4.4.6
+ - updated from glibc-2.13 to glibc-2.14
+ - updated from module-init-tools-3.16 to kmod-6
+ - updated from udev-163 to udev-182
+
 Version 10.0, Sat Mar  3 16:09:11 MST 2012
  - switched to a grand unified version -- went backwards, how wierd is that
  - distribution named "bazooka"

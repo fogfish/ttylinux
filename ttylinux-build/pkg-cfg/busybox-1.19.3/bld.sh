@@ -104,7 +104,8 @@ PATH="${XBT_BIN_PATH}:${PATH}" make \
 	ARCH="${TTYLINUX_CPU}" \
 	CROSS_COMPILE="${XBT_TARGET}-" \
 	CONFIG_PREFIX=${TTYLINUX_SYSROOT_DIR} \
-	SKIP_STRIP=${SKIP_STRIP_FLAG} || return 1
+	SKIP_STRIP=${SKIP_STRIP_FLAG} \
+	V=1 || return 1
 
 PKG_STATUS="make install error"
 # CFLAGS, ARCH and CROSS_COMPILE seem to be needed to make install.
@@ -140,7 +141,8 @@ PATH="${XBT_BIN_PATH}:${PATH}" make \
 	ARCH="${TTYLINUX_CPU}" \
 	CROSS_COMPILE="${XBT_TARGET}-" \
 	CONFIG_PREFIX=${TTYLINUX_SYSROOT_DIR} \
-	SKIP_STRIP=${SKIP_STRIP_FLAG} || return 1
+	SKIP_STRIP=${SKIP_STRIP_FLAG} \
+	V=1 || return 1
 
 # Install busybox suid files.
 #
