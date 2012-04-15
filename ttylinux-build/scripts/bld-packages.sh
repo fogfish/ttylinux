@@ -29,6 +29,7 @@
 #
 # CHANGE LOG
 #
+#	14apr12	drj	Make an error if a package list file is not found.
 #	26mar12	drj	Added support for xz decompressin of source tarballs.
 #	16mar12	drj	Changed the package done flags' location.
 #	16mar12	drj	Even better setting NJOBS.
@@ -122,10 +123,13 @@ package_list_make() {
 
 local cfgPkgFiles="$1"
 
+local retStat=0
 local lineNum=0
 local nLineUse=1
 local oLineUse=1
 local nesting=0
+
+echo "##### Making Package File List"
 
 rm --force "${TTYLINUX_VAR_DIR}/files"
 >"${TTYLINUX_VAR_DIR}/files"
@@ -155,6 +159,15 @@ while read; do
 	grep -q "^ *#" <<<${REPLY} && continue # Manage the comment lines.
 	[[ ${nLineUse} == 1 ]] && echo ${REPLY} >>"${TTYLINUX_VAR_DIR}/files"
 done <"${cfgPkgFiles}"
+
+while read; do
+	if [[ ! -e ${TTYLINUX_SYSROOT_DIR}/${REPLY} ]]; then
+		echo "***** ERROR missing => ${REPLY}"
+		retStat=1
+	fi
+done <"${TTYLINUX_VAR_DIR}/files"
+
+return ${retStat}
 
 }
 
@@ -436,7 +449,7 @@ if [[ -n "${fileList}" ]]; then
 	# "${fileList}"; then make a binary package from the list in
 	# "${TTYLINUX_VAR_DIR}/files".
 	#
-	package_list_make "${fileList}"
+	package_list_make "${fileList}" || return 1
 	uTarBall="${TTYLINUX_PKGBIN_DIR}/$1-${TTYLINUX_CPU}.tar"
 	cTarBall="${TTYLINUX_PKGBIN_DIR}/$1-${TTYLINUX_CPU}.tbz"
 	tar --create \
