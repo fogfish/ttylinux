@@ -8,8 +8,10 @@ cross-tools-*
 
 # ttylinux build system
 ttylinux-build/Site
-ttylinux-build/bootloader/uboot/MLO
+ttylinux-build/bootloader/isolinux/isolinux.bin
+ttylinux-build/bootloader/isolinux/syslinux
 ttylinux-build/bootloader/uboot/*.MAKELOG
+ttylinux-build/bootloader/uboot/MLO
 ttylinux-build/bootloader/uboot/mkimage
 ttylinux-build/bootloader/uboot/u-boot.bin
 ttylinux-build/bootloader/xload
