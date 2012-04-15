@@ -25,12 +25,12 @@
 # Definitions
 # ******************************************************************************
 
-PKG_URL="http://ftp.gnu.org/gnu/bash/"
-PKG_TAR="bash-4.2.tar.gz"
+PKG_URL="ftp://ftp.netfilter.org/pub/iptables/"
+PKG_TAR="iptables-1.4.13.tar.bz2"
 PKG_SUM=""
 
-PKG_NAME="bash"
-PKG_VERSION="4.2"
+PKG_NAME="iptables"
+PKG_VERSION="1.4.13"
 
 
 # ******************************************************************************
@@ -38,21 +38,8 @@ PKG_VERSION="4.2"
 # ******************************************************************************
 
 pkg_patch() {
-
-local patchDir="${TTYLINUX_PKGCFG_DIR}/${PKG_NAME}-${PKG_VERSION}/patch"
-local patchFile=""
-
-PKG_STATUS="Unspecified error -- check the ${PKG_NAME} build log"
-
-cd "${PKG_NAME}-${PKG_VERSION}"
-for patchFile in "${patchDir}"/*; do
-	[[ -r "${patchFile}" ]] && patch -p0 <"${patchFile}"
-done
-cd ..
-
 PKG_STATUS=""
 return 0
-
 }
 
 
@@ -62,13 +49,7 @@ return 0
 
 pkg_configure() {
 
-local TERMCAP_LIB="gnutermcap"
-
 PKG_STATUS="./configure error"
-
-if [[ x"${TTYLINUX_PACKAGE_NCURSES_HAS_LIBS:-}" == x"y" ]]; then
-	TERMCAP_LIB="libcurses"
-fi
 
 cd "${PKG_NAME}-${PKG_VERSION}"
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_set"
@@ -83,30 +64,16 @@ RANLIB="${XBT_RANLIB}" \
 SIZE="${XBT_SIZE}" \
 STRIP="${XBT_STRIP}" \
 CFLAGS="${TTYLINUX_CFLAGS}" \
-bash_cv_job_control_missing=present \
-bash_cv_printf_a_format=yes \
-bash_cv_termcap_lib=${TERMCAP_LIB} \
 ./configure \
 	--build=${MACHTYPE} \
 	--host=${XBT_TARGET} \
-	--prefix=/usr \
-	--enable-job-control \
-	--disable-nls \
-	--without-bash-malloc || return 1
-# ac_cv_func_setvbuf_reversed=no
-# ac_cv_have_decl_sys_siglist=yes
-# ac_cv_rl_prefix=path
-# ac_cv_rl_version=6.2
-# bash_cv_decl_under_sys_siglist=yes
-# bash_cv_func_ctype_nonascii=yes
-# bash_cv_func_sigsetjmp=present 
-# bash_cv_getcwd_malloc=yes
-# bash_cv_job_control_missing=present
-# bash_cv_printf_a_format=yes
-# bash_cv_sys_named_pipes=present
-# bash_cv_termcap_lib=libcurses
-# bash_cv_ulimit_maxfds=yes
-# bash_cv_unusable_rtsigs=no
+	--prefix=/ \
+	--libexecdir=/lib \
+	--mandir=/usr/share/man \
+	--enable-static \
+	--disable-devel \
+	--disable-shared \
+	--without-kernel || return 1
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_clr"
 cd ..
 
@@ -144,12 +111,21 @@ return 0
 
 pkg_install() {
 
-PKG_STATUS="Unspecified error -- check the ${PKG_NAME} build log"
+PKG_STATUS="install error"
 
 cd "${PKG_NAME}-${PKG_VERSION}"
-install --mode=755 --owner=0 --group=0 bash "${TTYLINUX_SYSROOT_DIR}/bin"
-rm --force "${TTYLINUX_SYSROOT_DIR}/bin/sh"
-ln --force --symbolic bash "${TTYLINUX_SYSROOT_DIR}/bin/sh"
+source "${TTYLINUX_XTOOL_DIR}/_xbt_env_set"
+rm --force ${TTYLINUX_SYSROOT_DIR}/sbin/ip6tables
+rm --force ${TTYLINUX_SYSROOT_DIR}/sbin/ip6tables-restore
+rm --force ${TTYLINUX_SYSROOT_DIR}/sbin/ip6tables-save
+rm --force ${TTYLINUX_SYSROOT_DIR}/sbin/iptables
+rm --force ${TTYLINUX_SYSROOT_DIR}/sbin/iptables-restore
+rm --force ${TTYLINUX_SYSROOT_DIR}/sbin/iptables-save
+rm --force ${TTYLINUX_SYSROOT_DIR}/sbin/xptables-multi
+PATH="${XBT_BIN_PATH}:${PATH}" make \
+	DESTDIR=${TTYLINUX_SYSROOT_DIR} \
+	install || return 1
+source "${TTYLINUX_XTOOL_DIR}/_xbt_env_clr"
 cd ..
 
 if [[ -d "rootfs/" ]]; then

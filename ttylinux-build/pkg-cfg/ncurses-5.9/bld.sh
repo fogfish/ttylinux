@@ -25,12 +25,12 @@
 # Definitions
 # ******************************************************************************
 
-PKG_URL="http://ftp.gnu.org/gnu/bash/"
-PKG_TAR="bash-4.2.tar.gz"
+PKG_URL="http://ftp.gnu.org/gnu/ncurses/"
+PKG_TAR="ncurses-5.9.tar.gz"
 PKG_SUM=""
 
-PKG_NAME="bash"
-PKG_VERSION="4.2"
+PKG_NAME="ncurses"
+PKG_VERSION="5.9"
 
 
 # ******************************************************************************
@@ -38,21 +38,8 @@ PKG_VERSION="4.2"
 # ******************************************************************************
 
 pkg_patch() {
-
-local patchDir="${TTYLINUX_PKGCFG_DIR}/${PKG_NAME}-${PKG_VERSION}/patch"
-local patchFile=""
-
-PKG_STATUS="Unspecified error -- check the ${PKG_NAME} build log"
-
-cd "${PKG_NAME}-${PKG_VERSION}"
-for patchFile in "${patchDir}"/*; do
-	[[ -r "${patchFile}" ]] && patch -p0 <"${patchFile}"
-done
-cd ..
-
 PKG_STATUS=""
 return 0
-
 }
 
 
@@ -62,16 +49,20 @@ return 0
 
 pkg_configure() {
 
-local TERMCAP_LIB="gnutermcap"
+local WITHOUT_CXX=""
 
 PKG_STATUS="./configure error"
 
-if [[ x"${TTYLINUX_PACKAGE_NCURSES_HAS_LIBS:-}" == x"y" ]]; then
-	TERMCAP_LIB="libcurses"
-fi
-
 cd "${PKG_NAME}-${PKG_VERSION}"
+
+mv misc/terminfo.src misc/terminfo.src-ORIG
+cp ${TTYLINUX_PKGCFG_DIR}/${PKG_NAME}-${PKG_VERSION}/terminfo.src \
+	misc/terminfo.src
+
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_set"
+if [[ x"${XBT_C_PLUS_PLUS}" == x"no" ]]; then
+	WITHOUT_CXX="--without-cxx --without-cxx-bindings"
+fi
 AR="${XBT_AR}" \
 AS="${XBT_AS} --sysroot=${TTYLINUX_SYSROOT_DIR}" \
 CC="${XBT_CC} --sysroot=${TTYLINUX_SYSROOT_DIR}" \
@@ -83,31 +74,26 @@ RANLIB="${XBT_RANLIB}" \
 SIZE="${XBT_SIZE}" \
 STRIP="${XBT_STRIP}" \
 CFLAGS="${TTYLINUX_CFLAGS}" \
-bash_cv_job_control_missing=present \
-bash_cv_printf_a_format=yes \
-bash_cv_termcap_lib=${TERMCAP_LIB} \
 ./configure \
 	--build=${MACHTYPE} \
 	--host=${XBT_TARGET} \
 	--prefix=/usr \
-	--enable-job-control \
-	--disable-nls \
-	--without-bash-malloc || return 1
-# ac_cv_func_setvbuf_reversed=no
-# ac_cv_have_decl_sys_siglist=yes
-# ac_cv_rl_prefix=path
-# ac_cv_rl_version=6.2
-# bash_cv_decl_under_sys_siglist=yes
-# bash_cv_func_ctype_nonascii=yes
-# bash_cv_func_sigsetjmp=present 
-# bash_cv_getcwd_malloc=yes
-# bash_cv_job_control_missing=present
-# bash_cv_printf_a_format=yes
-# bash_cv_sys_named_pipes=present
-# bash_cv_termcap_lib=libcurses
-# bash_cv_ulimit_maxfds=yes
-# bash_cv_unusable_rtsigs=no
+	--libdir=/lib \
+	--mandir=/usr/share/man \
+	--enable-shared \
+	--enable-overwrite \
+	--disable-largefile \
+	--disable-termcap \
+	--with-build-cc=gcc \
+	--with-install-prefix=${TTYLINUX_SYSROOT_DIR} \
+	--with-shared \
+	--without-ada \
+	${WITHOUT_CXX} \
+	--without-debug \
+	--without-gpm \
+	--without-normal || return 1
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_clr"
+
 cd ..
 
 PKG_STATUS=""
@@ -144,14 +130,35 @@ return 0
 
 pkg_install() {
 
-PKG_STATUS="Unspecified error -- check the ${PKG_NAME} build log"
+PKG_STATUS="install error"
 
 cd "${PKG_NAME}-${PKG_VERSION}"
-install --mode=755 --owner=0 --group=0 bash "${TTYLINUX_SYSROOT_DIR}/bin"
-rm --force "${TTYLINUX_SYSROOT_DIR}/bin/sh"
-ln --force --symbolic bash "${TTYLINUX_SYSROOT_DIR}/bin/sh"
+source "${TTYLINUX_XTOOL_DIR}/_xbt_env_set"
+
+PATH="${XBT_BIN_PATH}:${PATH}" make install || return 1
+
+mv ${TTYLINUX_SYSROOT_DIR}/lib/libncurses++.a ${TTYLINUX_SYSROOT_DIR}/usr/lib/
+
+_ln="ln --force --symbolic"
+_usrlib="${TTYLINUX_SYSROOT_DIR}/usr/lib"
+${_ln} ../../lib/libncurses.so.5   ${_usrlib}/libcurses.so
+${_ln} ../../lib/libform.so.5      ${_usrlib}/libform.so
+${_ln} ../../lib/libmenu.so.5      ${_usrlib}/libmenu.so
+${_ln} ../../lib/libncurses.so.5   ${_usrlib}/libncurses.so
+${_ln} ../../lib/libpanel.so.5     ${_usrlib}/libpanel.so
+${_ln} ../../lib/libncurses.so.5.9 ${_usrlib}/libcurses.so.5
+${_ln} ../../lib/libform.so.5.9    ${_usrlib}/libform.so.5
+${_ln} ../../lib/libmenu.so.5.9    ${_usrlib}/libmenu.so.5
+${_ln} ../../lib/libncurses.so.5.9 ${_usrlib}/libncurses.so.5
+${_ln} ../../lib/libpanel.so.5.9   ${_usrlib}/libpanel.so.5
+${_ln} libncurses.so.5 ${_usrlib}/libtinfo.so.5
+${_ln} libtinfo.so.5   ${_usrlib}/libtinfo.so
+unset _ln
+
+source "${TTYLINUX_XTOOL_DIR}/_xbt_env_clr"
 cd ..
 
+echo "Copying ${PKG_NAME} ttylinux-specific components to build-root."
 if [[ -d "rootfs/" ]]; then
 	find "rootfs/" ! -type d -exec touch {} \;
 	cp --archive --force rootfs/* "${TTYLINUX_SYSROOT_DIR}"
