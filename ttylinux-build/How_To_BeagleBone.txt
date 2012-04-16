@@ -1,27 +1,23 @@
 #!/bin/bash
 
 
-# Sat Mar 17 19:38:23 MST 2012
+# Sun Apr 15 21:41:03 MST 2012
 # ============================
 
 
 # kernel
 # ------
 #
-# Currently, ttylinux uses XXX kernel.
+# Currently, for no apparent reason, I am using this kernel:
+https://github.com/koenkooi/linux/tree/linux-ti33x-psp-3.2-r5a+gitr09e9651bcf2ee8d86685f2a8075bc6557b1d3b91
 #
-# File: XXX.tar.gz
-# Page: git://github.com/XXX/
-# Page: https://github.com/XXX/
-# Link: https://github.com/XXX.tar.gz
+# The file koenkooi-linux-v3.2-rc5-13113-gd623fcd.zip is un-zipped and the
+# top-level directory renamed from "koenkooi-linux-d623fcd/" to "linux-3.2.9/",
+# and then tarred-up.  The new linux-3.2.9.tar.bz2 is used by xbuildtools and
+# the ttylinux build system to make the current BeagleBone ttylinux.
 #
-# The file XXX.tar.gz is un-tarred and the
-# top-level directory renamed from "XXX" to "linux-3.2.9", and then tarred-up.
-# The new linux-3.2.9.tar.bz2 is used by xbuildtools and the ttylinux build
-# system to make the current BeagleBone ttylinux.
-#
-tar -xf XXX.tar.gz
-mv XXX/ linux-3.2.9/
+unzip koenkooi-linux-v3.2-rc5-13113-gd623fcd.zip
+mv koenkooi-linux-d623fcd/ linux-3.2.9/
 tar -cjf linux-3.2.9.tar.bz2 linux-3.2.9/
 
 
