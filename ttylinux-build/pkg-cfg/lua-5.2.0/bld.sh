@@ -25,12 +25,12 @@
 # Definitions
 # ******************************************************************************
 
-PKG_URL="http://tuxera.com/opensource/"
-PKG_TAR="ntfs-3g_ntfsprogs-2012.1.15.tgz"
+PKG_URL="http://www.lua.org/ftp/"
+PKG_TAR="lua-5.2.0.tar.gz"
 PKG_SUM=""
 
-PKG_NAME="ntfs-3g_ntfsprogs"
-PKG_VERSION="2012.1.15"
+PKG_NAME="lua"
+PKG_VERSION="5.2.0"
 
 
 # ******************************************************************************
@@ -48,36 +48,8 @@ return 0
 # ******************************************************************************
 
 pkg_configure() {
-
-PKG_STATUS="./configure error"
-
-cd "${PKG_NAME}-${PKG_VERSION}"
-source "${TTYLINUX_XTOOL_DIR}/_xbt_env_set"
-AR="${XBT_AR}" \
-AS="${XBT_AS} --sysroot=${TTYLINUX_SYSROOT_DIR}" \
-CC="${XBT_CC} --sysroot=${TTYLINUX_SYSROOT_DIR}" \
-CXX="${XBT_CXX} --sysroot=${TTYLINUX_SYSROOT_DIR}" \
-LD="${XBT_LD} --sysroot=${TTYLINUX_SYSROOT_DIR}" \
-NM="${XBT_NM}" \
-OBJCOPY="${XBT_OBJCOPY}" \
-RANLIB="${XBT_RANLIB}" \
-SIZE="${XBT_SIZE}" \
-STRIP="${XBT_STRIP}" \
-CFLAGS="${TTYLINUX_CFLAGS}" \
-./configure \
-	--build=${MACHTYPE} \
-	--host=${XBT_TARGET} \
-	--prefix=/usr \
-	--enable-shared \
-	--disable-static \
-	--disable-ldconfig || return 1
-
-source "${TTYLINUX_XTOOL_DIR}/_xbt_env_clr"
-cd ..
-
 PKG_STATUS=""
 return 0
-
 }
 
 
@@ -91,9 +63,21 @@ PKG_STATUS="make error"
 
 cd "${PKG_NAME}-${PKG_VERSION}"
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_set"
-PATH="${XBT_BIN_PATH}:${PATH}" make \
+
+PATH="${XBT_BIN_PATH}:${PATH}" make linux \
 	--jobs=${NJOBS} \
-	CROSS_COMPILE=${XBT_TARGET}- || return 1
+	AR="${XBT_AR} rcu " \
+	AS="${XBT_AS} --sysroot=${TTYLINUX_SYSROOT_DIR}" \
+	CC="${XBT_CC} --sysroot=${TTYLINUX_SYSROOT_DIR}" \
+	CXX="${XBT_CXX} --sysroot=${TTYLINUX_SYSROOT_DIR}" \
+	LD="${XBT_LD} --sysroot=${TTYLINUX_SYSROOT_DIR}" \
+	NM="${XBT_NM}" \
+	OBJCOPY="${XBT_OBJCOPY}" \
+	RANLIB="${XBT_RANLIB}" \
+	SIZE="${XBT_SIZE}" \
+	STRIP="${XBT_STRIP}" \
+	CFLAGS="${TTYLINUX_CFLAGS}" || return 1
+
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_clr"
 cd ..
 
@@ -109,23 +93,14 @@ return 0
 
 pkg_install() {
 
-PKG_STATUS="install error"
+PKG_STATUS="Unspecified error -- check the ${PKG_NAME} build log"
 
 cd "${PKG_NAME}-${PKG_VERSION}"
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_set"
 PATH="${XBT_BIN_PATH}:${PATH}" make \
-	DESTDIR=${TTYLINUX_SYSROOT_DIR} \
+	INSTALL_TOP=${TTYLINUX_SYSROOT_DIR} \
 	install || return 1
-rm --force ${TTYLINUX_SYSROOT_DIR}/sbin/mkfs.ntfs -> /usr/sbin/mkntfs
-rm --force ${TTYLINUX_SYSROOT_DIR}/sbin/mount.ntfs-3g -> /bin/ntfs-3g*
-rm --force ${TTYLINUX_SYSROOT_DIR}/sbin/mount.lowntfs-3g -> /bin/lowntfs-3g*
-rm --force ${TTYLINUX_SYSROOT_DIR}/usr/lib/libntfs-3g.so -> /lib/libntfs-3g.so
-_lnk="ln --symbolic"
-${_lnk} ../usr/sbin/mkntfs      ${TTYLINUX_SYSROOT_DIR}/sbin/mkfs.ntfs
-${_lnk} ../bin/ntfs-3g          ${TTYLINUX_SYSROOT_DIR}/sbin/mount.ntfs-3g
-${_lnk} ../bin/lowntfs-3g       ${TTYLINUX_SYSROOT_DIR}/sbin/mount.lowntfs-3g
-${_lnk} ../../lib/libntfs-3g.so ${TTYLINUX_SYSROOT_DIR}/usr/lib/libntfs-3g.so
-unset _lnk
+mv "${TTYLINUX_SYSROOT_DIR}/lib/liblua.a" "${TTYLINUX_SYSROOT_DIR}/usr/lib"
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_clr"
 cd ..
 

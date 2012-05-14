@@ -25,12 +25,12 @@
 # Definitions
 # ******************************************************************************
 
-PKG_URL="http://www.kernel.org/pub/linux/utils/kernel/kmod/"
-PKG_TAR="kmod-6.tar.bz2"
+PKG_URL="ftp://ftp.netfilter.org/pub/iptables/"
+PKG_TAR="iptables-1.4.13.tar.bz2"
 PKG_SUM=""
 
-PKG_NAME="kmod"
-PKG_VERSION="6"
+PKG_NAME="iptables"
+PKG_VERSION="1.4.13"
 
 
 # ******************************************************************************
@@ -67,12 +67,13 @@ CFLAGS="${TTYLINUX_CFLAGS}" \
 ./configure \
 	--build=${MACHTYPE} \
 	--host=${XBT_TARGET} \
-	--prefix=/usr \
-	--bindir=/bin \
-	--libdir=/lib \
-	--sysconfdir=/etc \
-	--without-xz \
-	--without-zlib || return 1
+	--prefix=/ \
+	--libexecdir=/lib \
+	--mandir=/usr/share/man \
+	--enable-static \
+	--disable-devel \
+	--disable-shared \
+	--without-kernel || return 1
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_clr"
 cd ..
 
@@ -114,20 +115,20 @@ PKG_STATUS="install error"
 
 cd "${PKG_NAME}-${PKG_VERSION}"
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_set"
+rm --force ${TTYLINUX_SYSROOT_DIR}/sbin/ip6tables
+rm --force ${TTYLINUX_SYSROOT_DIR}/sbin/ip6tables-restore
+rm --force ${TTYLINUX_SYSROOT_DIR}/sbin/ip6tables-save
+rm --force ${TTYLINUX_SYSROOT_DIR}/sbin/iptables
+rm --force ${TTYLINUX_SYSROOT_DIR}/sbin/iptables-restore
+rm --force ${TTYLINUX_SYSROOT_DIR}/sbin/iptables-save
+rm --force ${TTYLINUX_SYSROOT_DIR}/sbin/xptables-multi
 PATH="${XBT_BIN_PATH}:${PATH}" make \
-	CROSS_COMPILE=${XBT_TARGET}- \
 	DESTDIR=${TTYLINUX_SYSROOT_DIR} \
-	INSTALL=install \
 	install || return 1
+rm --force ${TTYLINUX_SYSROOT_DIR}/bin/iptables-xml
+ln --symbolic ../sbin/xtables-multi ${TTYLINUX_SYSROOT_DIR}/bin/iptables-xml
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_clr"
 cd ..
-
-ln --symbolic ../bin/kmod ${TTYLINUX_SYSROOT_DIR}/sbin/depmod
-ln --symbolic ../bin/kmod ${TTYLINUX_SYSROOT_DIR}/sbin/insmod
-ln --symbolic ../bin/kmod ${TTYLINUX_SYSROOT_DIR}/sbin/modinfo
-ln --symbolic ../bin/kmod ${TTYLINUX_SYSROOT_DIR}/sbin/modprobe
-ln --symbolic ../bin/kmod ${TTYLINUX_SYSROOT_DIR}/sbin/rmmod
-ln --symbolic kmod        ${TTYLINUX_SYSROOT_DIR}/bin/lsmod
 
 if [[ -d "rootfs/" ]]; then
 	find "rootfs/" ! -type d -exec touch {} \;
@@ -145,7 +146,6 @@ return 0
 # ******************************************************************************
 
 pkg_clean() {
-PKG_STATUS="Unspecified error -- check the ${PKG_NAME} build log"
 PKG_STATUS=""
 return 0
 }

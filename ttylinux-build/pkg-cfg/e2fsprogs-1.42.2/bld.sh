@@ -25,12 +25,12 @@
 # Definitions
 # ******************************************************************************
 
-PKG_URL="http://tuxera.com/opensource/"
-PKG_TAR="ntfs-3g_ntfsprogs-2012.1.15.tgz"
+PKG_URL="http://sourceforge.net/projects/e2fsprogs/files/e2fsprogs/v1.42.2/"
+PKG_TAR="e2fsprogs-1.42.2.tar.gz"
 PKG_SUM=""
 
-PKG_NAME="ntfs-3g_ntfsprogs"
-PKG_VERSION="2012.1.15"
+PKG_NAME="e2fsprogs"
+PKG_VERSION="1.42.2"
 
 
 # ******************************************************************************
@@ -49,7 +49,17 @@ return 0
 
 pkg_configure() {
 
+local CONFIG_BLKID="--disable-libblkid"
+local CONFIG_DEFRAG="--enable-defrag"
+local TTYLINUX_LDFLAGS="-lblkid"
+
 PKG_STATUS="./configure error"
+
+[[ "${TTYLINUX_PLATFORM}" == "pc_i486"    ]] && CONFIG_BLKID="--enable-libblkid"
+[[ "${TTYLINUX_PLATFORM}" == "wrtu54g_tm" ]] && CONFIG_BLKID="--enable-libblkid"
+[[ "${TTYLINUX_PLATFORM}" == "wrtu54g_tm" ]] && CONFIG_DEFRAG="--disable-defrag"
+[[ "${TTYLINUX_PLATFORM}" == "pc_i486"    ]] && TTYLINUX_LDFLAGS=""
+[[ "${TTYLINUX_PLATFORM}" == "wrtu54g_tm" ]] && TTYLINUX_LDFLAGS=""
 
 cd "${PKG_NAME}-${PKG_VERSION}"
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_set"
@@ -64,13 +74,35 @@ RANLIB="${XBT_RANLIB}" \
 SIZE="${XBT_SIZE}" \
 STRIP="${XBT_STRIP}" \
 CFLAGS="${TTYLINUX_CFLAGS}" \
+LDFLAGS="${TTYLINUX_LDFLAGS}" \
 ./configure \
 	--build=${MACHTYPE} \
 	--host=${XBT_TARGET} \
 	--prefix=/usr \
-	--enable-shared \
-	--disable-static \
-	--disable-ldconfig || return 1
+	--with-root-prefix="" \
+	${CONFIG_BLKID} \
+	${CONFIG_DEFRAG} \
+	--enable-fsck \
+	--enable-libuuid \
+	--enable-option-checking \
+	--enable-rpath \
+	--enable-tls \
+	--enable-verbose-makecmds \
+	--disable-blkid-debug \
+	--disable-bsd-shlibs \
+	--disable-checker \
+	--disable-compression \
+	--disable-debugfs \
+	--disable-e2initrd-helper \
+	--disable-elf-shlibs \
+	--disable-imager \
+	--disable-jbd-debug \
+	--disable-maintainer-mode \
+	--disable-nls \
+	--disable-profile \
+	--disable-resizer \
+	--disable-testio-debug \
+	--disable-uuidd || return 1
 
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_clr"
 cd ..
@@ -109,23 +141,16 @@ return 0
 
 pkg_install() {
 
-PKG_STATUS="install error"
+PKG_STATUS="make install error"
 
 cd "${PKG_NAME}-${PKG_VERSION}"
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_set"
 PATH="${XBT_BIN_PATH}:${PATH}" make \
 	DESTDIR=${TTYLINUX_SYSROOT_DIR} \
 	install || return 1
-rm --force ${TTYLINUX_SYSROOT_DIR}/sbin/mkfs.ntfs -> /usr/sbin/mkntfs
-rm --force ${TTYLINUX_SYSROOT_DIR}/sbin/mount.ntfs-3g -> /bin/ntfs-3g*
-rm --force ${TTYLINUX_SYSROOT_DIR}/sbin/mount.lowntfs-3g -> /bin/lowntfs-3g*
-rm --force ${TTYLINUX_SYSROOT_DIR}/usr/lib/libntfs-3g.so -> /lib/libntfs-3g.so
-_lnk="ln --symbolic"
-${_lnk} ../usr/sbin/mkntfs      ${TTYLINUX_SYSROOT_DIR}/sbin/mkfs.ntfs
-${_lnk} ../bin/ntfs-3g          ${TTYLINUX_SYSROOT_DIR}/sbin/mount.ntfs-3g
-${_lnk} ../bin/lowntfs-3g       ${TTYLINUX_SYSROOT_DIR}/sbin/mount.lowntfs-3g
-${_lnk} ../../lib/libntfs-3g.so ${TTYLINUX_SYSROOT_DIR}/usr/lib/libntfs-3g.so
-unset _lnk
+PATH="${XBT_BIN_PATH}:${PATH}" make \
+	DESTDIR=${TTYLINUX_SYSROOT_DIR} \
+	install-libs || return 1
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_clr"
 cd ..
 

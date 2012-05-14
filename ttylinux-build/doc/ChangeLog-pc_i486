@@ -1,6 +1,13 @@
 Current  Maintainer: (2008-    ) Douglas Jerome <douglas@ttylinux.org>
 Previous Maintainer: (2001-2008) Pascal Schmidt <ttylinux@ewetel.net>
 
+Version 14.1, Sun May 13 18:59:49 MST 2012
+ - distribution named "boomslang"
+ - updated from busybox-1.19.3 to busybox-1.19.4
+ - updated from e2fsprogs-1.42.1 to e2fsprogs-1.42.2
+ - updated from iptables-1.4.12.2 to iptables-1.4.13
+ - updated from ncurse-5.7 to ncurses-5.9
+
 Version 14.0, Sun Apr  8 15:31:28 MST 2012
  - skipped version numbers -- how wierd is that
  - distribution named "hawberk"

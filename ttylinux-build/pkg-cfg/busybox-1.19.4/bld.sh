@@ -26,11 +26,11 @@
 # ******************************************************************************
 
 PKG_URL="http://www.busybox.net/downloads/"
-PKG_TAR="busybox-1.19.3.tar.bz2"
+PKG_TAR="busybox-1.19.4.tar.bz2"
 PKG_SUM=""
 
 PKG_NAME="busybox"
-PKG_VERSION="1.19.3"
+PKG_VERSION="1.19.4"
 
 
 # ******************************************************************************

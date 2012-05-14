@@ -26,11 +26,11 @@
 # ******************************************************************************
 
 PKG_URL="http://ftp.gnu.org/gnu/ncurses/"
-PKG_TAR="ncurses-5.7.tar.gz"
+PKG_TAR="ncurses-5.9.tar.gz"
 PKG_SUM=""
 
 PKG_NAME="ncurses"
-PKG_VERSION="5.7"
+PKG_VERSION="5.9"
 
 
 # ******************************************************************************
@@ -137,6 +137,8 @@ source "${TTYLINUX_XTOOL_DIR}/_xbt_env_set"
 
 PATH="${XBT_BIN_PATH}:${PATH}" make install || return 1
 
+mv ${TTYLINUX_SYSROOT_DIR}/lib/libncurses++.a ${TTYLINUX_SYSROOT_DIR}/usr/lib/
+
 _ln="ln --force --symbolic"
 _usrlib="${TTYLINUX_SYSROOT_DIR}/usr/lib"
 ${_ln} ../../lib/libncurses.so.5   ${_usrlib}/libcurses.so
@@ -144,11 +146,11 @@ ${_ln} ../../lib/libform.so.5      ${_usrlib}/libform.so
 ${_ln} ../../lib/libmenu.so.5      ${_usrlib}/libmenu.so
 ${_ln} ../../lib/libncurses.so.5   ${_usrlib}/libncurses.so
 ${_ln} ../../lib/libpanel.so.5     ${_usrlib}/libpanel.so
-${_ln} ../../lib/libncurses.so.5.7 ${_usrlib}/libcurses.so.5
-${_ln} ../../lib/libform.so.5.7    ${_usrlib}/libform.so.5
-${_ln} ../../lib/libmenu.so.5.7    ${_usrlib}/libmenu.so.5
-${_ln} ../../lib/libncurses.so.5.7 ${_usrlib}/libncurses.so.5
-${_ln} ../../lib/libpanel.so.5.7   ${_usrlib}/libpanel.so.5
+${_ln} ../../lib/libncurses.so.5.9 ${_usrlib}/libcurses.so.5
+${_ln} ../../lib/libform.so.5.9    ${_usrlib}/libform.so.5
+${_ln} ../../lib/libmenu.so.5.9    ${_usrlib}/libmenu.so.5
+${_ln} ../../lib/libncurses.so.5.9 ${_usrlib}/libncurses.so.5
+${_ln} ../../lib/libpanel.so.5.9   ${_usrlib}/libpanel.so.5
 ${_ln} libncurses.so.5 ${_usrlib}/libtinfo.so.5
 ${_ln} libtinfo.so.5   ${_usrlib}/libtinfo.so
 unset _ln

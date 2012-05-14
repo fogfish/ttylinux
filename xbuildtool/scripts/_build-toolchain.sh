@@ -962,42 +962,62 @@ rm --force --recursive *
 if [[ ! -f "${XBT_TARGET_DIR}/.done.kernel_headers" ]]; then
 	xbt_build_kernel_headers >${XBT_TARGET_DIR}/_log.0.kernel_headers 2>&1
 	touch "${XBT_TARGET_DIR}/.done.kernel_headers"
+else
+	echo "get kernel headers ................ already done"
 fi
 if [[ ! -f "${XBT_TARGET_DIR}/.done.binutils" ]]; then
 	xbt_build_binutils       >${XBT_TARGET_DIR}/_log.1.binutils       2>&1
 	touch "${XBT_TARGET_DIR}/.done.binutils"
+else
+	echo "binutils .......................... already done"
 fi
 if [[ ! -f "${XBT_TARGET_DIR}/.done.gcc_libs" ]]; then
 	xbt_build_gcc_libs       >${XBT_TARGET_DIR}/_log.2.gcc_libs       2>&1
 	touch "${XBT_TARGET_DIR}/.done.gcc_libs"
+else
+	echo "gcc libs .......................... already done"
 fi
 if [[ ! -f "${XBT_TARGET_DIR}/.done.gcc_stage1" ]]; then
 	xbt_build_gcc_stage1     >${XBT_TARGET_DIR}/_log.3.gcc_stage1     2>&1
 	touch "${XBT_TARGET_DIR}/.done.gcc_stage1"
+else
+	echo "gcc stage 1 ....................... already done"
 fi
 if [[ ! -f "${XBT_TARGET_DIR}/.done.libc_stage1" ]]; then
 	xbt_build_libc_stage1    >${XBT_TARGET_DIR}/_log.4.libc_stage1    2>&1
 	touch "${XBT_TARGET_DIR}/.done.libc_stage1"
+else
+	echo "libc stage 1 ...................... already done"
 fi
 if [[ ! -f "${XBT_TARGET_DIR}/.done.gcc_stage2" ]]; then
 	xbt_build_gcc_stage2     >${XBT_TARGET_DIR}/_log.5.gcc_stage2     2>&1
 	touch "${XBT_TARGET_DIR}/.done.gcc_stage2"
+else
+	echo "gcc stage 2 ....................... already done"
 fi
 if [[ ! -f "${XBT_TARGET_DIR}/.done.libc_stage2" ]]; then
 	xbt_build_libc_stage2    >${XBT_TARGET_DIR}/_log.6.libc_stage2    2>&1
 	touch "${XBT_TARGET_DIR}/.done.libc_stage2"
+else
+	echo "libc stage 2 ...................... already done"
 fi
 if [[ ! -f "${XBT_TARGET_DIR}/.done.gcc_stage3" ]]; then
 	xbt_build_gcc_stage3     >${XBT_TARGET_DIR}/_log.7.gcc_stage3     2>&1
 	touch "${XBT_TARGET_DIR}/.done.gcc_stage3"
+else
+	echo "gcc stage 3 ....................... already done"
 fi
 if [[ ! -f "${XBT_TARGET_DIR}/.done.libc_stage3" ]]; then
 	xbt_build_libc_stage3    >${XBT_TARGET_DIR}/_log.8.libc_stage3    2>&1
 	touch "${XBT_TARGET_DIR}/.done.libc_stage3"
+else
+	echo "libc stage 3 ...................... already done"
 fi
 if [[ ! -f "${XBT_TARGET_DIR}/.done.target_adjust" ]]; then
 	xbt_target_adjust        >${XBT_TARGET_DIR}/_log.9.target_adjust  2>&1
 	touch "${XBT_TARGET_DIR}/.done.target_adjust"
+else
+	echo "target adjust ..................... already done"
 fi
 )
 

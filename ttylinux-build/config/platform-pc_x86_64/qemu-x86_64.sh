@@ -28,9 +28,10 @@ for p in ${PATH//:/ }; do
 done
 if [[ x"${_path}" = x ]]; then
 	echo ""
-	echo "Cannot find an executable \"qemu\" program in your \$PATH"
-	echo "setting.  Maybe you need to set your \$PATH or download and"
-	echo "install qemu.  Qemu can be found at http://wiki.qemu.org/"
+	echo "Cannot find an executable \"qemu-system-x86_64\" program"
+	echo "in your \$PATH setting.  Maybe you need to set your \$PATH"
+	echo "or download and install qemu."
+	echo "Qemu can be found at http://wiki.qemu.org/"
 	echo ""
 	exit 1
 fi
@@ -91,6 +92,7 @@ _rdsksz="ramdisk_size=65536"
 for p in ${REPLY}; do
 	if [[ x"${p:0:8}" = x"console=" ]]; then
 		_serial="-serial udp::6174"
+		_serial="-serial stdio"
 		echo ""
 		echo "To use serial terminal on the host use nc: nc -u -l 6174"
 		echo "Maybe "stty -echo" after logged in."

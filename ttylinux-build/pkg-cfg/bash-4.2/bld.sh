@@ -95,6 +95,8 @@ bash_cv_termcap_lib=${TERMCAP_LIB} \
 	--without-bash-malloc || return 1
 # ac_cv_func_setvbuf_reversed=no
 # ac_cv_have_decl_sys_siglist=yes
+# ac_cv_rl_prefix=path
+# ac_cv_rl_version=6.2
 # bash_cv_decl_under_sys_siglist=yes
 # bash_cv_func_ctype_nonascii=yes
 # bash_cv_func_sigsetjmp=present 

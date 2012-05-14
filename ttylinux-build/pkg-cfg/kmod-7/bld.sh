@@ -25,12 +25,12 @@
 # Definitions
 # ******************************************************************************
 
-PKG_URL="http://sourceforge.net/projects/e2fsprogs/files/e2fsprogs/v1.42.1/"
-PKG_TAR="e2fsprogs-1.42.1.tar.gz"
+PKG_URL="http://www.kernel.org/pub/linux/utils/kernel/kmod/"
+PKG_TAR="kmod-7.tar.bz2"
 PKG_SUM=""
 
-PKG_NAME="e2fsprogs"
-PKG_VERSION="1.42.1"
+PKG_NAME="kmod"
+PKG_VERSION="7"
 
 
 # ******************************************************************************
@@ -49,17 +49,7 @@ return 0
 
 pkg_configure() {
 
-local CONFIG_BLKID="--disable-libblkid"
-local CONFIG_DEFRAG="--enable-defrag"
-local TTYLINUX_LDFLAGS="-lblkid"
-
 PKG_STATUS="./configure error"
-
-[[ "${TTYLINUX_PLATFORM}" == "pc_i486"    ]] && CONFIG_BLKID="--enable-libblkid"
-[[ "${TTYLINUX_PLATFORM}" == "wrtu54g_tm" ]] && CONFIG_BLKID="--enable-libblkid"
-[[ "${TTYLINUX_PLATFORM}" == "wrtu54g_tm" ]] && CONFIG_DEFRAG="--disable-defrag"
-[[ "${TTYLINUX_PLATFORM}" == "pc_i486"    ]] && TTYLINUX_LDFLAGS=""
-[[ "${TTYLINUX_PLATFORM}" == "wrtu54g_tm" ]] && TTYLINUX_LDFLAGS=""
 
 cd "${PKG_NAME}-${PKG_VERSION}"
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_set"
@@ -74,36 +64,15 @@ RANLIB="${XBT_RANLIB}" \
 SIZE="${XBT_SIZE}" \
 STRIP="${XBT_STRIP}" \
 CFLAGS="${TTYLINUX_CFLAGS}" \
-LDFLAGS="${TTYLINUX_LDFLAGS}" \
 ./configure \
 	--build=${MACHTYPE} \
 	--host=${XBT_TARGET} \
 	--prefix=/usr \
-	--with-root-prefix="" \
-	${CONFIG_BLKID} \
-	${CONFIG_DEFRAG} \
-	--enable-fsck \
-	--enable-libuuid \
-	--enable-option-checking \
-	--enable-rpath \
-	--enable-tls \
-	--enable-verbose-makecmds \
-	--disable-blkid-debug \
-	--disable-bsd-shlibs \
-	--disable-checker \
-	--disable-compression \
-	--disable-debugfs \
-	--disable-e2initrd-helper \
-	--disable-elf-shlibs \
-	--disable-imager \
-	--disable-jbd-debug \
-	--disable-maintainer-mode \
-	--disable-nls \
-	--disable-profile \
-	--disable-resizer \
-	--disable-testio-debug \
-	--disable-uuidd || return 1
-
+	--bindir=/bin \
+	--libdir=/lib \
+	--sysconfdir=/etc \
+	--without-xz \
+	--without-zlib || return 1
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_clr"
 cd ..
 
@@ -141,18 +110,24 @@ return 0
 
 pkg_install() {
 
-PKG_STATUS="make install error"
+PKG_STATUS="install error"
 
 cd "${PKG_NAME}-${PKG_VERSION}"
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_set"
 PATH="${XBT_BIN_PATH}:${PATH}" make \
+	CROSS_COMPILE=${XBT_TARGET}- \
 	DESTDIR=${TTYLINUX_SYSROOT_DIR} \
+	INSTALL=install \
 	install || return 1
-PATH="${XBT_BIN_PATH}:${PATH}" make \
-	DESTDIR=${TTYLINUX_SYSROOT_DIR} \
-	install-libs || return 1
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_clr"
 cd ..
+
+ln --symbolic ../bin/kmod ${TTYLINUX_SYSROOT_DIR}/sbin/depmod
+ln --symbolic ../bin/kmod ${TTYLINUX_SYSROOT_DIR}/sbin/insmod
+ln --symbolic ../bin/kmod ${TTYLINUX_SYSROOT_DIR}/sbin/modinfo
+ln --symbolic ../bin/kmod ${TTYLINUX_SYSROOT_DIR}/sbin/modprobe
+ln --symbolic ../bin/kmod ${TTYLINUX_SYSROOT_DIR}/sbin/rmmod
+ln --symbolic kmod        ${TTYLINUX_SYSROOT_DIR}/bin/lsmod
 
 if [[ -d "rootfs/" ]]; then
 	find "rootfs/" ! -type d -exec touch {} \;
@@ -170,6 +145,7 @@ return 0
 # ******************************************************************************
 
 pkg_clean() {
+PKG_STATUS="Unspecified error -- check the ${PKG_NAME} build log"
 PKG_STATUS=""
 return 0
 }

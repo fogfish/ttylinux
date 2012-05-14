@@ -25,12 +25,12 @@
 # Definitions
 # ******************************************************************************
 
-PKG_URL="ftp://ftp.netfilter.org/pub/iptables/"
-PKG_TAR="iptables-1.4.12.2.tar.bz2"
+PKG_URL="http://ftp.gnu.org/gnu/readline/"
+PKG_TAR="readline-6.2.tar.gz"
 PKG_SUM=""
 
-PKG_NAME="iptables"
-PKG_VERSION="1.4.12.2"
+PKG_NAME="readline"
+PKG_VERSION="6.2"
 
 
 # ******************************************************************************
@@ -38,8 +38,16 @@ PKG_VERSION="1.4.12.2"
 # ******************************************************************************
 
 pkg_patch() {
+
 PKG_STATUS=""
+
+cd "${PKG_NAME}-${PKG_VERSION}"
+sed -e '/MV.*old/d'  -i Makefile.in
+sed -e '/OLDSUFF/c:' -i support/shlib-install
+cd ..
+
 return 0
+
 }
 
 
@@ -67,13 +75,8 @@ CFLAGS="${TTYLINUX_CFLAGS}" \
 ./configure \
 	--build=${MACHTYPE} \
 	--host=${XBT_TARGET} \
-	--prefix=/ \
-	--libexecdir=/lib \
-	--mandir=/usr/share/man \
-	--enable-static \
-	--disable-devel \
-	--disable-shared \
-	--without-kernel || return 1
+	--prefix=/usr \
+	--libdir=/lib || return 1
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_clr"
 cd ..
 
@@ -95,7 +98,8 @@ cd "${PKG_NAME}-${PKG_VERSION}"
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_set"
 PATH="${XBT_BIN_PATH}:${PATH}" make \
 	--jobs=${NJOBS} \
-	CROSS_COMPILE=${XBT_TARGET}- || return 1
+	CROSS_COMPILE=${XBT_TARGET}- \
+	SHLIB_LIBS=-lncurses || return 1
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_clr"
 cd ..
 
@@ -111,21 +115,32 @@ return 0
 
 pkg_install() {
 
-PKG_STATUS="install error"
+PKG_STATUS="Unspecified error -- check the ${PKG_NAME} build log"
 
 cd "${PKG_NAME}-${PKG_VERSION}"
+
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_set"
-rm --force ${TTYLINUX_SYSROOT_DIR}/sbin/ip6tables
-rm --force ${TTYLINUX_SYSROOT_DIR}/sbin/ip6tables-restore
-rm --force ${TTYLINUX_SYSROOT_DIR}/sbin/ip6tables-save
-rm --force ${TTYLINUX_SYSROOT_DIR}/sbin/iptables
-rm --force ${TTYLINUX_SYSROOT_DIR}/sbin/iptables-restore
-rm --force ${TTYLINUX_SYSROOT_DIR}/sbin/iptables-save
-rm --force ${TTYLINUX_SYSROOT_DIR}/sbin/xptables-multi
 PATH="${XBT_BIN_PATH}:${PATH}" make \
+	CROSS_COMPILE=${XBT_TARGET}- \
 	DESTDIR=${TTYLINUX_SYSROOT_DIR} \
 	install || return 1
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_clr"
+
+# Put static libraries into /usr/lib and give them the correct permissions.
+#
+mv ${TTYLINUX_SYSROOT_DIR}/lib/libhistory.a  ${TTYLINUX_SYSROOT_DIR}/usr/lib/
+mv ${TTYLINUX_SYSROOT_DIR}/lib/libreadline.a ${TTYLINUX_SYSROOT_DIR}/usr/lib/
+
+# Give the shared libraries the correct permissions and make links to them
+# in /usr/lib.
+#
+chmod 755 ${TTYLINUX_SYSROOT_DIR}/lib/libhistory.so.6.2
+chmod 755 ${TTYLINUX_SYSROOT_DIR}/lib/libreadline.so.6.2
+rm -f ${TTYLINUX_SYSROOT_DIR}/usr/lib/libhistory.so
+rm -f ${TTYLINUX_SYSROOT_DIR}/usr/lib/libreadline.so
+ln -fs ../../lib/libhistory.so.6  ${TTYLINUX_SYSROOT_DIR}/usr/lib/libhistory.so
+ln -fs ../../lib/libreadline.so.6 ${TTYLINUX_SYSROOT_DIR}/usr/lib/libreadline.so
+
 cd ..
 
 if [[ -d "rootfs/" ]]; then

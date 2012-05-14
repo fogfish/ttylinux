@@ -1,6 +1,15 @@
 Current  Maintainer: (2008-    ) Douglas Jerome <douglas@ttylinux.org>
 
 
+Version 14.1, Sun May 13 18:59:49 MST 2012
+ - distribution named "boomslang"
+ - updated from e2fsprogs-1.42.1 to e2fsprogs-1.42.2
+ - updated from iptables-1.4.12.2 to iptables-1.4.13
+ - updated from ncurses-5.7 to ncurses-5.9
+ - updated from kmod-6 to kmod-7
+ - added from readline-6.2
+ - added from lua-5.2.0
+
 Version 14.0, Sun Apr  8 21:25:50 MST 2012
  - skipped version numbers -- how wierd is that
  - distribution named "hawberk"
