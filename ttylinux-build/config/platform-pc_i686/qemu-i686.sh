@@ -24,13 +24,14 @@ exit 1
 
 _path=""
 for p in ${PATH//:/ }; do
-	if [[ -x $p/qemu ]]; then _path=$p/qemu; fi
+	if [[ -x $p/qemu-system-i386 ]]; then _path=$p/qemu-system-i386; fi
 done
 if [[ x"${_path}" = x ]]; then
 	echo ""
-	echo "Cannot find an executable \"qemu\" program in your \$PATH"
-	echo "setting.  Maybe you need to set your \$PATH or download and"
-	echo "install qemu.  Qemu can be found at http://wiki.qemu.org/"
+	echo "Cannot find an executable \"qemu-system-i386\" program"
+	echo "in your \$PATH setting.  Maybe you need to set your \$PATH"
+	echo "or download and install qemu."
+	echo "Qemu can be found at http://wiki.qemu.org/"
 	echo ""
 	exit 1
 fi
@@ -99,10 +100,10 @@ for p in ${REPLY}; do
 	fi
 done
 
-qemu							\
+qemu-system-i386					\
 	-cpu coreduo					\
 	-smp 2,maxcpus=2,cores=2,threads=2,sockets=2	\
-	-m 96						\
+	-m 128						\
 	-net nic,model=rtl8139				\
 	${_serial}					\
 	-kernel $1/${_kernel}				\

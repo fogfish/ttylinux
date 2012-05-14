@@ -25,7 +25,7 @@
 # Definitions
 # ******************************************************************************
 
-PKG_URL=""
+PKG_URL="http://www.lua.org/ftp/"
 PKG_TAR="lua-5.2.0.tar.gz"
 PKG_SUM=""
 

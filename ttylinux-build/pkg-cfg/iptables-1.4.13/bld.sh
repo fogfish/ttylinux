@@ -125,6 +125,8 @@ rm --force ${TTYLINUX_SYSROOT_DIR}/sbin/xptables-multi
 PATH="${XBT_BIN_PATH}:${PATH}" make \
 	DESTDIR=${TTYLINUX_SYSROOT_DIR} \
 	install || return 1
+rm --force ${TTYLINUX_SYSROOT_DIR}/bin/iptables-xml
+ln --symbolic ../sbin/xtables-multi ${TTYLINUX_SYSROOT_DIR}/bin/iptables-xml
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_clr"
 cd ..
 

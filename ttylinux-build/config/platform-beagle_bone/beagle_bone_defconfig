@@ -2,7 +2,7 @@
 
 #
 # beagle_bone
-# Sat Apr 14 10:32:35 MST 2012
+# Sun May 13 19:04:51 MST 2012
 #
 
 TTYLINUX_NAME=
@@ -83,8 +83,8 @@ TTYLINUX_PACKAGE[i++]="dropbear-0.53.1"
 TTYLINUX_PACKAGE[i++]="thttpd-2.25b"
 # ---------------------------------------------------------------- applications
 # TTYLINUX_PACKAGE[i++]="alsa-utils-1.0.25"
-TTYLINUX_PACKAGE[i++]="retawq-0.2.6c"
-TTYLINUX_PACKAGE[i++]="lua-5.2.0"
 TTYLINUX_PACKAGE[i++]="calc-2.12.4.4"
+TTYLINUX_PACKAGE[i++]="lua-5.2.0"
+TTYLINUX_PACKAGE[i++]="retawq-0.2.6c"
 
 # end of file

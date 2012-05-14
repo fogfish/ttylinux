@@ -116,6 +116,16 @@ source "${TTYLINUX_XTOOL_DIR}/_xbt_env_set"
 PATH="${XBT_BIN_PATH}:${PATH}" make \
 	DESTDIR=${TTYLINUX_SYSROOT_DIR} \
 	install || return 1
+rm --force ${TTYLINUX_SYSROOT_DIR}/sbin/mkfs.ntfs -> /usr/sbin/mkntfs
+rm --force ${TTYLINUX_SYSROOT_DIR}/sbin/mount.ntfs-3g -> /bin/ntfs-3g*
+rm --force ${TTYLINUX_SYSROOT_DIR}/sbin/mount.lowntfs-3g -> /bin/lowntfs-3g*
+rm --force ${TTYLINUX_SYSROOT_DIR}/usr/lib/libntfs-3g.so -> /lib/libntfs-3g.so
+_lnk="ln --symbolic"
+${_lnk} ../usr/sbin/mkntfs      ${TTYLINUX_SYSROOT_DIR}/sbin/mkfs.ntfs
+${_lnk} ../bin/ntfs-3g          ${TTYLINUX_SYSROOT_DIR}/sbin/mount.ntfs-3g
+${_lnk} ../bin/lowntfs-3g       ${TTYLINUX_SYSROOT_DIR}/sbin/mount.lowntfs-3g
+${_lnk} ../../lib/libntfs-3g.so ${TTYLINUX_SYSROOT_DIR}/usr/lib/libntfs-3g.so
+unset _lnk
 source "${TTYLINUX_XTOOL_DIR}/_xbt_env_clr"
 cd ..
 

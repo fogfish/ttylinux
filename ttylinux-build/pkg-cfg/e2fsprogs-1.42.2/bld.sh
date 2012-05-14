@@ -25,7 +25,7 @@
 # Definitions
 # ******************************************************************************
 
-PKG_URL="http://sourceforge.net/projects/e2fsprogs/files/e2fsprogs/v1.42.1/"
+PKG_URL="http://sourceforge.net/projects/e2fsprogs/files/e2fsprogs/v1.42.2/"
 PKG_TAR="e2fsprogs-1.42.2.tar.gz"
 PKG_SUM=""
 
