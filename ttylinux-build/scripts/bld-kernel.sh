@@ -76,7 +76,6 @@ ttylinux_build_comment ""
 
 rm --force --recursive "${TTYLINUX_BUILD_DIR}"/kpkgs/*
 rm --force --recursive "${TTYLINUX_BUILD_DIR}"/kroot/*
-#rm --force --recursive "${TTYLINUX_BUILD_DIR}"/linux-${kver}*/
 rm --force --recursive "${TTYLINUX_BUILD_DIR}"/linux-${kver}
 rm --force --recursive "${TTYLINUX_BUILD_DIR}"/linux/
 
@@ -385,7 +384,7 @@ fi
 
 echo -n "c" >&${CONSOLE_FD}
 echo "i> Removing build directory linux-${kver}"
-rm --force --recursive "linux-${kver}/"
+rm --force --recursive "linux-${kver}"
 rm --force --recursive "linux/"
 
 return 0
