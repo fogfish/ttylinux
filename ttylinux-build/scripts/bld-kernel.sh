@@ -76,9 +76,11 @@ ttylinux_build_comment ""
 
 rm --force --recursive "${TTYLINUX_BUILD_DIR}"/kpkgs/*
 rm --force --recursive "${TTYLINUX_BUILD_DIR}"/kroot/*
-rm --force --recursive "${TTYLINUX_BUILD_DIR}"/linux-${kver}*/
+#rm --force --recursive "${TTYLINUX_BUILD_DIR}"/linux-${kver}*/
+rm --force --recursive "${TTYLINUX_BUILD_DIR}"/linux-${kver}
 rm --force --recursive "${TTYLINUX_BUILD_DIR}"/linux/
 
+return 0
 }
 
 
@@ -100,16 +102,22 @@ echo -n "g." >&${CONSOLE_FD}
 #
 if [[ -n "${TTYLINUX_USER_KERNEL:-}" ]]; then
 	srcd="${TTYLINUX_DIR}/site/platform-${TTYLINUX_PLATFORM}"
-	kcfg="${srcd}/kernel-${TTYLINUX_USER_KERNEL}.cfg"
+	if [[ -f "${srcd}/linux-${kver}/.config" ]]; then
+		kcfg="${srcd}/linux-${kver}/.config"
+	else
+		kcfg="${srcd}/kernel-${TTYLINUX_USER_KERNEL}.cfg"
+	fi
 fi
 
 ttylinux_build_comment ""
 ttylinux_build_comment "kernel source"
 ttylinux_build_comment "=> ${srcd}/linux-${kver}.tar.bz2"
+ttylinux_build_comment "=> ${kcfg}"
+
 
 # Look for the linux kernel tarball.
 #
-if [[ ! -f "${srcd}/linux-${kver}.tar.bz2" ]]; then
+if [[ ! -f "${srcd}/linux-${kver}.tar.bz2" && ! -d "${srcd}/linux-${kver}" ]]; then
 	echo "E> Linux kernel source tarball not found." >&2
 	echo "=> ${srcd}/linux-${kver}.tar.bz2" >&2
 	exit 1
@@ -147,12 +155,19 @@ kernel_clean
 #
 trap kernel_clean EXIT
 #
+
 ttylinux_build_comment ""
-ttylinux_build_command "cp ${srcd}/linux-${kver}.tar.bz2 linux-${kver}.tar.bz2"
-ttylinux_build_command "bunzip2 --force linux-${kver}.tar.bz2"
-ttylinux_build_command "tar --extract --file=linux-${kver}.tar"
-ttylinux_build_command "rm --force linux-${kver}.tar"
-ttylinux_build_command "cp ${kcfg} linux-${kver}/.config"
+if [[ -d "${srcd}/linux-${kver}" ]]; then
+   ttylinux_build_command "ln -s ${srcd}/linux-${kver} ."
+   [[ ! -f "linux-${kver}/.config" ]] && ttylinux_build_command "cp ${kcfg} linux-${kver}/.config"
+else
+   ttylinux_build_command "cp ${srcd}/linux-${kver}.tar.bz2 linux-${kver}.tar.bz2"
+   ttylinux_build_command "bunzip2 --force linux-${kver}.tar.bz2"
+   ttylinux_build_command "tar --extract --file=linux-${kver}.tar"
+   ttylinux_build_command "rm --force linux-${kver}.tar"
+   ttylinux_build_command "cp ${kcfg} linux-${kver}/.config"
+fi
+
 #
 trap - EXIT
 
@@ -184,6 +199,7 @@ case "${TTYLINUX_PLATFORM}" in
 	beagle_*)   target="uImage"  ;;
 	mac_*)      target="zImage"  ;;
 	pc_*)       target="bzImage" ;;
+    vm_*)       target="bzImage" ;;
 	wrtu54g_tm) target="vmlinux" ;;
 esac
 
@@ -191,7 +207,7 @@ cd "linux-${kver}"
 
 # If this is not a user-custom ttylinux kernel, then do some kernel source code
 # fix-ups, if needed.
-#
+
 if [[ -z "${TTYLINUX_USER_KERNEL:-}" ]]; then
 	if [[ -f scripts/unifdef.c ]]; then
 		# This is for older kernels; it is harmless otherwise.
@@ -296,6 +312,7 @@ case "${TTYLINUX_PLATFORM}" in
 	beagle_*)   _vmlinuz+="uImage"  ;;
 	mac_*)      _vmlinuz+="zImage"  ;;
 	pc_*)       _vmlinuz+="bzImage" ;;
+    vm_*)       _vmlinuz+="bzImage" ;;
 	wrtu54g_tm) _vmlinuz="vmlinux"  ;;
 esac
 
