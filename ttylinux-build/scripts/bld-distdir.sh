@@ -686,6 +686,7 @@ echo ""
 [[ "${TTYLINUX_PLATFORM}" == "pc_i686"     ]] && pc_dir_make      || true
 [[ "${TTYLINUX_PLATFORM}" == "pc_x86_64"   ]] && pc_dir_make      || true
 [[ "${TTYLINUX_PLATFORM}" == "vm_i686"     ]] && pc_dir_make      || true
+[[ "${TTYLINUX_PLATFORM}" == "vm_x86_64"   ]] && pc_dir_make      || true
 [[ "${TTYLINUX_PLATFORM}" == "wrtu54g_tm"  ]] && wrtu54g_dir_make || true
 
 echo ""

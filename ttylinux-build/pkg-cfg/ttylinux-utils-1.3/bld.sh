@@ -76,6 +76,9 @@ if [[ -d "rootfs/" ]]; then
 	cp --archive --force rootfs/* "${TTYLINUX_SYSROOT_DIR}"
 fi
 
+[[ "${TTYLINUX_PLATFORM}" == "vm_i686"   ]] && cp -f ${TTYLINUX_PKGCFG_DIR}/${PKG_TAR}/patch/${TTYLINUX_PLATFORM}/install.conf ${TTYLINUX_SYSROOT_DIR}/root/install.conf
+[[ "${TTYLINUX_PLATFORM}" == "vm_x86_64" ]] && cp -f ${TTYLINUX_PKGCFG_DIR}/${PKG_TAR}/patch/${TTYLINUX_PLATFORM}/install.conf ${TTYLINUX_SYSROOT_DIR}/root/install.conf
+
 PKG_STATUS=""
 return 0
 

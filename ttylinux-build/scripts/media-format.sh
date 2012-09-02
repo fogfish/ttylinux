@@ -191,6 +191,7 @@ echo ""
 [[ "${TTYLINUX_PLATFORM}" == "pc_i686"       ]] && nada                || true
 [[ "${TTYLINUX_PLATFORM}" == "pc_x86_64"     ]] && nada                || true
 [[ "${TTYLINUX_PLATFORM}" == "vm_i686"       ]] && nada                || true
+[[ "${TTYLINUX_PLATFORM}" == "vm_x86_64"     ]] && nada                || true
 [[ "${TTYLINUX_PLATFORM}" == "wrtu54g_tm"    ]] && nada                || true
 
 echo ""
