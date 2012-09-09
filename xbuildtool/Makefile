@@ -73,7 +73,7 @@ SHELL=/bin/bash
 
 .PHONY:	help setup clean dload
 .PHONY:	armv7-2.14-gnueabi mipsel-uclibc powerpc-2.14-gnu
-.PHONY:	i486-2.9-gnu i686-2.14-gnu x86_64-2.14-gnu
+.PHONY:	i486-2.9-gnu i686-2.14-gnu x86_64-2.14-gnu x86_64-2.14-gnu-vm
 
 help:
 	@echo ""
@@ -96,6 +96,7 @@ help:
 	@echo "make i486-2.9-gnu .............. pc_i486     (linux-2.6.34.6)"
 	@echo "make i686-2.14-gnu ............. pc_i686     (linux-2.6.38.1)"
 	@echo "make x86_64-2.14-gnu ........... pc_x86_64   (linux-2.6.38.1)"
+	@echo "make x86_64-2.14-gnu-vm ........ vm_x86_64   (linux-3.5.3)"
 	@echo ""
 	@echo "Variables:"
 	@echo ""
@@ -141,6 +142,12 @@ i686-2.14-gnu:
 x86_64-2.14-gnu:
 	rm -f xbt-build-config.sh
 	cp config/ttyl-pc_x86_64.cfg xbt-build-config.sh
+	./scripts/_build-toolchain.sh $${CONTINUE/yes/continue}
+
+
+x86_64-2.14-gnu-vm:
+	rm -f xbt-build-config.sh
+	cp config/ttyl-vm_x86_64.cfg xbt-build-config.sh
 	./scripts/_build-toolchain.sh $${CONTINUE/yes/continue}
 
 
