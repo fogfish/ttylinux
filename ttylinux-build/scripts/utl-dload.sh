@@ -180,11 +180,20 @@ dist_config_setup || exit 1
 echo "i> Getting source code packages [be patient, this will not lock up]."
 echo "i> Local cache directory: ${K_CACHEDIR}"
 
-while read name pad tag url; do
-	[[ -z "${name}"         ]] && continue || true
-	[[ "${name:0:1}" == "#" ]] && continue || true
-	dload_get_file ${name} ${tag} ${url}
-done <${K_PKGLIST}
+if [[ $# -gt 0 ]]; then
+        # get only package
+        source "${TTYLINUX_PKGCFG_DIR}/$1/bld.sh"
+        dload_get_file ${PKG_TAR%.*} ${PKG_TAR##*.} ${PKG_URL} 
+
+else
+
+	while read name pad tag url; do
+		[[ -z "${name}"         ]] && continue || true
+		[[ "${name:0:1}" == "#" ]] && continue || true
+		dload_get_file ${name} ${tag} ${url}
+	done <${K_PKGLIST}
+fi
+
 
 if [[ ${G_NMISSING} != 0 ]]; then
 	echo "Oops -- missing ${G_NMISSING} packages."

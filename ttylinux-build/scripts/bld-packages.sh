@@ -101,7 +101,10 @@ fi
 if [[ -n "${tarBall}" ]]; then
 	cp "${TTYLINUX_PKGSRC_DIR}/${tarBall}" .
 	${unZipper} "${tarBall}" >/dev/null
-	tar --extract --file="${srcPkg}.tar"
+        mkdir ${srcPkg}
+        cd ${srcPkg}
+	tar --extract --file="../${srcPkg}.tar" --strip 1
+        cd ..
 	rm --force "${srcPkg}.tar"
 fi
 
@@ -157,7 +160,13 @@ while read; do
 	}
 	grep -q "^ *#" <<<${REPLY} && echo "Skipping ${REPLY}"
 	grep -q "^ *#" <<<${REPLY} && continue # Manage the comment lines.
-	[[ ${nLineUse} == 1 ]] && echo ${REPLY} >>"${TTYLINUX_VAR_DIR}/files"
+	if [[ ${nLineUse} == 1 ]] ; then
+                if [[ -d ${TTYLINUX_SYSROOT_DIR}${REPLY} ]] ; then
+                         find ${TTYLINUX_SYSROOT_DIR}${REPLY} | sed "s|${TTYLINUX_SYSROOT_DIR}/||" >> "${TTYLINUX_VAR_DIR}/files"
+                else
+                         echo ${REPLY} >>"${TTYLINUX_VAR_DIR}/files"
+                fi
+        fi
 done <"${cfgPkgFiles}"
 
 while read; do
@@ -442,6 +451,7 @@ fi
 
 # Remark on the current activity.  Probably do something interesting.
 #
+
 if [[ -n "${fileList}" ]]; then
 	echo -n "p." >&${CONSOLE_FD}
 	#

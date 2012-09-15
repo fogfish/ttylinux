@@ -239,7 +239,7 @@ ttylinux-pkglst.txt pkglist:	ttylinux-config.sh
 
 dload:	ttylinux-pkglst.txt scripts/utl-dload.sh
 	@echo "Download ttylinux source packages."
-	@(scripts/utl-dload.sh)
+	@(scripts/utl-dload.sh $(PACKAGE))
 	@if [ $$? -ne 0 ]; then						\
 		echo "Download FAILED.";				\
 		exit 1;							\
