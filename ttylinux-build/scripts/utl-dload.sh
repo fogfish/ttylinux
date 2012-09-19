@@ -180,7 +180,8 @@ dist_config_setup || exit 1
 echo "i> Getting source code packages [be patient, this will not lock up]."
 echo "i> Local cache directory: ${K_CACHEDIR}"
 
-if [[ $# -gt 0 ]]; then
+
+if [[ "x$1" != "x" ]]; then
         # get only package
         source "${TTYLINUX_PKGCFG_DIR}/$1/bld.sh"
         dload_get_file ${PKG_TAR%.*} ${PKG_TAR##*.} ${PKG_URL} 
